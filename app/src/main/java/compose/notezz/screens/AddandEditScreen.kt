@@ -1,15 +1,21 @@
 package compose.notezz.screens
 
+import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -17,6 +23,7 @@ import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.Note
 import compose.notezz.model.NoteInfo
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun AddandEditScreen(token: String, navController: NavController) {
 
@@ -25,36 +32,53 @@ fun AddandEditScreen(token: String, navController: NavController) {
     val title = remember { mutableStateOf("") }
     val body = remember { mutableStateOf("") }
     val addState = remember { mutableStateOf(false) }
+    Scaffold(topBar = {
+        TopAppBar(
+            modifier = Modifier
+                .fillMaxWidth(),
+            backgroundColor =Color.DarkGray
 
+        ) {
+
+            Icon(modifier = Modifier.padding(start = 10.dp),tint = Color.Cyan,painter = painterResource(id = compose.notezz.R.drawable.logo), contentDescription = "logo")
+            Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more", )
+        }
+    }){}
     Box(modifier = Modifier.fillMaxWidth(), Alignment.Center){ Column(
-        modifier = Modifier.padding(5.dp),
+        modifier = Modifier.padding(top = 55.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(top = 10.dp, start = 10.dp, end = 10.dp)
             , elevation = 20.dp
         ) {
-            TextField(value = title.value,
+            OutlinedTextField(value = title.value,
                 onValueChange = { title.value = it },
                 modifier = Modifier.padding(5.dp),
-                placeholder = { Text("title") })
+                placeholder = { Text("Note title") })
         }
+        Spacer(modifier = Modifier.padding(top = 20.dp))
         Card(
             modifier = Modifier
-                .wrapContentHeight()
+                .padding(start = 10.dp, end = 10.dp)
                 .fillMaxWidth()
-                .padding(10.dp),
+                .fillMaxHeight(0.4f),
             elevation = 20.dp,
         ) {
-            TextField(value = body.value,
+            OutlinedTextField(value = body.value,
                 onValueChange = { body.value = it },
                 modifier = Modifier.padding(5.dp),
-                placeholder = { Text(text = "description") })
+                placeholder = { Text(text = "Note description") })
         }
+        Spacer(modifier = Modifier.padding(top = 20.dp))
         Button(onClick = { addState.value = true }, modifier = Modifier.wrapContentSize()) {
-            Text("Add note")
+           Icon(painter = painterResource(id = compose.notezz.R.drawable.ic_baseline_save_24), contentDescription = "save")
+            Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
+           // Spacer(modifier = Modifier.size(ButtonDefaults.IconSize))
+            Text("Add Note")
         }
     }
     }

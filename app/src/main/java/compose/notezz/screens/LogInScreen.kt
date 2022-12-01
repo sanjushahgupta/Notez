@@ -1,26 +1,30 @@
 package compose.notezz.screens
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.material.R
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import compose.notezz.R
 import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.ResponseofSignUpAndLogIn
 import compose.notezz.model.UsernameandPassword
 import kotlinx.coroutines.delay
 
-@SuppressLint("SuspiciousIndentation")
+@SuppressLint("SuspiciousIndentation", "UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun LogInScreen(navController: NavController) {
 
@@ -28,27 +32,39 @@ fun LogInScreen(navController: NavController) {
     val username = remember { mutableStateOf("ramniwash") }
     val password = remember { mutableStateOf("2rxbjjbd") }
     var stateOfLoginButton = remember { mutableStateOf(false) }
-    Box(modifier = Modifier.fillMaxWidth(), Alignment.Center) {
+    Scaffold(topBar = {
+        TopAppBar(
+            modifier = Modifier
+                .fillMaxWidth(),
+                backgroundColor = Color.DarkGray
+        ) {
+
+            Icon(modifier = Modifier.padding(start = 10.dp),tint = Color.Cyan,painter = painterResource(id = compose.notezz.R.drawable.logo), contentDescription = "logo")
+            Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more", )
+        }
+    }){}
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxWidth()
-                .padding(10.dp),
+                .padding(start = 10.dp, end = 10.dp)
+                ,
             verticalArrangement = Arrangement.Center
         ) {
 
             Text(
                 text = "Login",
-                fontSize = 30.sp,
+                style = MaterialTheme.typography.h5,
                 color = Color.Black,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 15.dp, top = 15.dp)
+                modifier = Modifier.padding(bottom = 15.dp, top = 59.dp)
             )
             Divider()
             Text(
                 text = "Login below to see your old notes.",
                 modifier = Modifier.padding(bottom = 8.dp, top = 8.dp),
-                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
                 // color = Color(R.color.textColor)
             )
 
@@ -58,7 +74,7 @@ fun LogInScreen(navController: NavController) {
                 fontWeight = FontWeight.Bold,
                 //  color = Color(R.color.textColor)
             )
-            TextField(
+            OutlinedTextField(
                 value = username.value,
                 onValueChange = { username.value = it },
                 modifier = Modifier
@@ -73,7 +89,7 @@ fun LogInScreen(navController: NavController) {
                 fontWeight = FontWeight.Bold,
                 //  color = Color(R.color.textColor)
             )
-            TextField(
+            OutlinedTextField(
                 value = password.value,
                 onValueChange = { password.value = it },
                 modifier = Modifier
@@ -83,12 +99,10 @@ fun LogInScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.padding(top = 15.dp))
 
-            Row(horizontalArrangement = Arrangement.SpaceBetween) {
+
                 Button(
                     onClick = { stateOfLoginButton.value = true },
-                    shape = RectangleShape,
-                    //colors = ButtonDefaults.buttonColors(contentColor = Color.White, backgroundColor = Color(
-                    //   R.color.buttonColor))
+                   // colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue)
                 ) {
                     Icon(
                         tint = Color.White,
@@ -104,28 +118,28 @@ fun LogInScreen(navController: NavController) {
                         modifier = Modifier.padding(bottom = 5.dp, top = 5.dp)
                     )
                 }
-                Spacer(Modifier.weight(1f))
+Spacer(modifier = Modifier.padding(bottom = 12.dp))
                 Text(
                     "Forgot Password?",
                     fontWeight = FontWeight.Bold,
-                    // color = colorResource(id = R.color.blueColor),
+                    color = colorResource(id = R.color.blue)
                 )
 
 
-            }
+
 
             Spacer(modifier = Modifier.padding(bottom = 15.dp))
             Text(
                 "Don't have an account?",
                 modifier = Modifier.padding(bottom = 5.dp, top = 5.dp),
                 fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.h6,
                 // color = Color(R.color.textColor)
             )
 
             Button(
                 onClick = {},
-                // colors = ButtonDefaults.buttonColors(Color(R.color.buttonColor))
-
+              //  colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue)
             ) {
                 Icon(
                     tint = Color.White,
@@ -173,5 +187,5 @@ fun LogInScreen(navController: NavController) {
 
             }
         }
-    }
+
 }
