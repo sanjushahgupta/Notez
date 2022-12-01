@@ -2,7 +2,6 @@ package compose.notezz.screens
 
 import android.annotation.SuppressLint
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -28,66 +27,74 @@ import compose.notezz.model.NoteInfo
 fun AddandEditScreen(token: String, navController: NavController) {
 
     val authViewModel: AuthenticationViewModel = hiltViewModel()
-
     val title = remember { mutableStateOf("") }
     val body = remember { mutableStateOf("") }
     val addState = remember { mutableStateOf(false) }
+
     Scaffold(topBar = {
         TopAppBar(
             modifier = Modifier
                 .fillMaxWidth(),
-            backgroundColor =Color.DarkGray
+            backgroundColor = Color.DarkGray) {
 
-        ) {
+            Icon(
+                modifier = Modifier.padding(start = 10.dp),
+                tint = Color.Cyan,
+                painter = painterResource(id = compose.notezz.R.drawable.logo),
+                contentDescription = "logo"
+            )
+            Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
+        }
+    }) {}
 
-            Icon(modifier = Modifier.padding(start = 10.dp),tint = Color.Cyan,painter = painterResource(id = compose.notezz.R.drawable.logo), contentDescription = "logo")
-            Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more", )
-        }
-    }){}
-    Box(modifier = Modifier.fillMaxWidth(), Alignment.Center){ Column(
-        modifier = Modifier.padding(top = 55.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp, start = 10.dp, end = 10.dp)
-            , elevation = 20.dp
+    Box(modifier = Modifier.fillMaxWidth(), Alignment.Center) {
+        Column(
+            modifier = Modifier.padding(top = 55.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            OutlinedTextField(value = title.value,
-                onValueChange = { title.value = it },
-                modifier = Modifier.padding(5.dp),
-                placeholder = { Text("Note title") })
-        }
-        Spacer(modifier = Modifier.padding(top = 20.dp))
-        Card(
-            modifier = Modifier
-                .padding(start = 10.dp, end = 10.dp)
-                .fillMaxWidth()
-                .fillMaxHeight(0.4f),
-            elevation = 20.dp,
-        ) {
-            OutlinedTextField(value = body.value,
-                onValueChange = { body.value = it },
-                modifier = Modifier.padding(5.dp),
-                placeholder = { Text(text = "Note description") })
-        }
-        Spacer(modifier = Modifier.padding(top = 20.dp))
-        Button(onClick = { addState.value = true }, modifier = Modifier.wrapContentSize()) {
-           Icon(painter = painterResource(id = compose.notezz.R.drawable.ic_baseline_save_24), contentDescription = "save")
-            Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-           // Spacer(modifier = Modifier.size(ButtonDefaults.IconSize))
-            Text("Add Note")
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp, start = 10.dp, end = 10.dp), elevation = 20.dp
+            ) {
+                OutlinedTextField(value = title.value,
+                    onValueChange = { title.value = it },
+                    modifier = Modifier.padding(5.dp),
+                    placeholder = { Text("Note title") })
+            }
+            Spacer(modifier = Modifier.padding(top = 20.dp))
+            Card(
+                modifier = Modifier
+                    .padding(start = 10.dp, end = 10.dp)
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.4f),
+                elevation = 20.dp,
+            ) {
+                OutlinedTextField(value = body.value,
+                    onValueChange = { body.value = it },
+                    modifier = Modifier.padding(5.dp),
+                    placeholder = { Text(text = "Note description") })
+            }
+            Spacer(modifier = Modifier.padding(top = 20.dp))
+            Button(onClick = { addState.value = true }, modifier = Modifier.wrapContentSize()) {
+                Icon(
+                    painter = painterResource(id = compose.notezz.R.drawable.ic_baseline_save_24),
+                    contentDescription = "save"
+                )
+                Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
+                // Spacer(modifier = Modifier.size(ButtonDefaults.IconSize))
+                Text("Add Note")
+            }
         }
     }
-    }
-    var noteInfo = NoteInfo(title.value, body.value, status = "active")
+
+    val noteInfo = NoteInfo(title.value, body.value, status = "active")
 
     if (addState.value == true) {
         val context = LocalContext.current
         val response =
-            produceState<DataOrException<ArrayList<Note>, Boolean, Exception>>(
+            produceState<DataOrException<Note, Boolean, Exception>>(
                 initialValue = DataOrException(
                     loading = true
                 )
@@ -97,14 +104,12 @@ fun AddandEditScreen(token: String, navController: NavController) {
 
         if (response.loading == true) {
             CircularProgressIndicator()
-        } else if (response.data != null) {
+        }else if (response.data  != null) {
             navController.navigate("listofNotes/$token")
             Toast.makeText(context, "Note Added", Toast.LENGTH_LONG).show()
             addState.value = false
-        } else {
-            Toast.makeText(context, "Something went wrong", Toast.LENGTH_LONG).show()
-            addState.value = false
+        }else{
+            Toast.makeText(context, "Something went wrong, Try again", Toast.LENGTH_LONG).show()
         }
-
     }
 }

@@ -12,7 +12,7 @@ interface NotezzApi {
     suspend fun SignUp(@Body register: UsernameandPassword): ResponseofSignUpAndLogIn
 
     @POST("/auth/signin")
-    suspend fun LogIn(@Body usernameandPassword: UsernameandPassword):ResponseofSignUpAndLogIn
+    suspend fun LogIn(@Body usernameandPassword: UsernameandPassword): ResponseofSignUpAndLogIn
 
 
     @GET("/notes")
@@ -21,9 +21,15 @@ interface NotezzApi {
 
     // {title: "hello", body: "<p>mann</p>", status: "ACTIVE"}
     @POST("/notes")
-    suspend fun addNotes(@Header("Authorization") token: String, @Body noteInfo: NoteInfo): ArrayList<Note>
+    suspend fun addNotes(@Header("Authorization") token: String, @Body noteInfo: NoteInfo): Note
 
 
     @DELETE("/notes/{id}")
     suspend fun deleteNote(@Header("Authorization") token: String, @Path("id") id: Int)
+
+    //Request URL: https://api.notezz.com/notes/70342
+    //Request Method: PATCH
+
+    @PATCH("/notes/{id}")
+    suspend fun updateNote(@Header("Authorization") token: String, @Path("id") id:Int, @Body note: Note):Note
 }

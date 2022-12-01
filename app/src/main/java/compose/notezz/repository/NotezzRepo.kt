@@ -38,7 +38,7 @@ class NotezzRepo @Inject constructor(val api: NotezzApi) {
         return DataOrException(response)
     }
 
-    suspend fun addNote(token: String, noteInfo: NoteInfo):DataOrException<ArrayList<Note>, Boolean, Exception>{
+    suspend fun addNote(token: String, noteInfo: NoteInfo):DataOrException<Note, Boolean, Exception>{
         val response = try{
             api.addNotes(token, noteInfo)
 
@@ -54,4 +54,9 @@ class NotezzRepo @Inject constructor(val api: NotezzApi) {
     suspend fun deleteNote(token: String, id: Int) {
         api.deleteNote(token, id)
     }
+
+    suspend fun updateNote(token: String, id:Int, note: Note){
+        api.updateNote(token, id,note)
+    }
+
 }

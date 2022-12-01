@@ -1,10 +1,8 @@
 package compose.notezz.screens
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.material.SnackbarDefaults.backgroundColor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
@@ -13,8 +11,6 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -28,7 +24,7 @@ import compose.notezz.model.UsernameandPassword
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun SignUpScreen(navController: NavController){
+fun SignUpScreen(navController: NavController) {
     var authViewModel: AuthenticationViewModel = hiltViewModel()
     val username = remember { mutableStateOf("ramniwash") }
     val password = remember { mutableStateOf("2rxbjjbd") }
@@ -37,20 +33,24 @@ fun SignUpScreen(navController: NavController){
         TopAppBar(
             modifier = Modifier
                 .fillMaxWidth(),
-            backgroundColor =Color.DarkGray
+            backgroundColor = Color.DarkGray
         ) {
 
-            Icon(modifier = Modifier.padding(start = 10.dp),tint = Color.Cyan,painter = painterResource(id = R.drawable.logo), contentDescription = "logo")
-            Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more", )
+            Icon(
+                modifier = Modifier.padding(start = 10.dp),
+                tint = Color.Cyan,
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "logo"
+            )
+            Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
         }
-    }){}
+    }) {}
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxWidth()
-            .padding(start = 10.dp, end = 10.dp)
-        ,
+            .padding(start = 10.dp, end = 10.dp),
         verticalArrangement = Arrangement.Center
     ) {
 
@@ -117,7 +117,7 @@ fun SignUpScreen(navController: NavController){
         Text(
             "By registering, you agree to our Terms and Conditions and Privacy Policy",
             fontWeight = FontWeight.Bold,
-           // color = colorResource(id = R.color.blue)
+            // color = colorResource(id = R.color.blue)
         )
 
         Spacer(modifier = Modifier.padding(bottom = 12.dp))
@@ -184,10 +184,9 @@ fun SignUpScreen(navController: NavController){
     if (NotezzData.loading == true) {
         CircularProgressIndicator()
 
-    } else if(NotezzData.data != null){
+    } else if (NotezzData.data != null) {
         Text(text = NotezzData.data?.token.toString())
     }
-
 
 
 }

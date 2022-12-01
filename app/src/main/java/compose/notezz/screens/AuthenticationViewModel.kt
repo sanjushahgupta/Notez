@@ -29,20 +29,24 @@ class AuthenticationViewModel @Inject constructor(val notezzRepo: NotezzRepo) : 
          }
      }*/
 
-    suspend fun logIn(usernameandPasswordL: UsernameandPassword): DataOrException<ResponseofSignUpAndLogIn, Boolean, Exception>{
+    suspend fun logIn(usernameandPasswordL: UsernameandPassword): DataOrException<ResponseofSignUpAndLogIn, Boolean, Exception> {
         return notezzRepo.logIn(usernameandPasswordL)
     }
 
-    suspend fun getNotes(token:String):DataOrException<ArrayList<Note>, Boolean, Exception>{
+    suspend fun getNotes(token: String): DataOrException<ArrayList<Note>, Boolean, Exception> {
         return notezzRepo.getNotes(token)
     }
 
-    suspend fun addNote(token:String, noteInfo: NoteInfo):DataOrException<ArrayList<Note>, Boolean, Exception>{
+    suspend fun addNote(
+        token: String,
+        noteInfo: NoteInfo
+    ): DataOrException<Note, Boolean, Exception> {
         return notezzRepo.addNote(token, noteInfo)
     }
-    fun deleteNote(token:String, id:Int){
+
+    fun deleteNote(token: String, id: Int) {
         viewModelScope.launch {
-            notezzRepo.deleteNote("Bearer"+" "+ token, id)
+            notezzRepo.deleteNote("Bearer" + " " + token, id)
         }
 
 
