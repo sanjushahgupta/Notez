@@ -1,7 +1,6 @@
 package compose.notezz.screens
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,11 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -29,16 +24,23 @@ import androidx.navigation.NavController
 import compose.notezz.R
 import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.Note
+import compose.notezz.model.UserPreference
+import kotlinx.coroutines.launch
 
 @SuppressLint("SuspiciousIndentation", "UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun HomeScreenListOfNotes(tokenfromRoomDB: String, navController: NavController) {
+fun HomeScreenListOfNotes(Token: String, navController: NavController) {
     val authViewModel: AuthenticationViewModel = hiltViewModel()
+    var token = Token
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val dataStore = UserPreference(context)
+   var loginStatus by remember { mutableStateOf("") }
 
     val notesResult = produceState<DataOrException<ArrayList<Note>, Boolean, Exception>>(
         initialValue = DataOrException(loading = true)
     ) {
-        value = authViewModel.getNotes("Bearer" + " " + tokenfromRoomDB)
+        value = authViewModel.getNotes("Bearer" + " " + token)
     }.value
     Scaffold(topBar = {
         TopAppBar(
@@ -48,14 +50,29 @@ fun HomeScreenListOfNotes(tokenfromRoomDB: String, navController: NavController)
 
         ) {
 
+
             Icon(
                 modifier = Modifier.padding(start = 10.dp),
                 tint = Color.Cyan,
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "logo"
             )
-            Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
+                Spacer(Modifier.weight(1f))
+            Icon(tint = Color.White,
+                painter = painterResource(id = R.drawable.ic_baseline_logout_24),
+                contentDescription = "logout",
+                modifier = Modifier
+                    .padding(end = 10.dp)
+                    .clickable {
+                        token = "Tokenis0"
+                        navController.navigate("logIn")
+                        loginStatus = "0"
+                        scope.launch {
+                            dataStore.saveLoginStatus(loginStatus)
+                        }
+                    })
         }
+
     }) {}
 
 
@@ -65,7 +82,7 @@ fun HomeScreenListOfNotes(tokenfromRoomDB: String, navController: NavController)
 
         } else if (notesResult.data != null) {
 
-            ListItem(authViewModel, tokenfromRoomDB, navController, notesResult.data!!)
+            ListItem(authViewModel, token, navController, notesResult.data!!)
 
         }
 
@@ -73,7 +90,7 @@ fun HomeScreenListOfNotes(tokenfromRoomDB: String, navController: NavController)
             FloatingActionButton(
                 onClick = {
 
-                    navController.navigate("addNotes/$tokenfromRoomDB/title/body/idis0/status/created/updated/userId") },
+                    navController.navigate("addNotes/$token/title/body/idis0/status/created/updated/userId") },
                 backgroundColor = Color.Cyan
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "To add Notes")
@@ -121,7 +138,7 @@ fun ListItem(
                             contentDescription = "edit",
                             modifier = Modifier
                                 .padding(end = 20.dp)
-                               .clickable { navController.navigate("addNotes/$token/${item.title}/${item.body}/${item.id}/${item.status}/${item.created}/${item.created}/${item.userId}") }
+                                .clickable { navController.navigate("addNotes/$token/${item.title}/${item.body}/${item.id}/${item.status}/${item.created}/${item.created}/${item.userId}") }
                         )
                         Spacer(Modifier.weight(1f))
                         Icon(

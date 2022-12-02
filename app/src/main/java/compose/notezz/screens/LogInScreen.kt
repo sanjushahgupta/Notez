@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -18,10 +19,14 @@ import androidx.navigation.NavController
 import compose.notezz.R
 import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.ResponseofSignUpAndLogIn
+import compose.notezz.model.UserPreference
 import compose.notezz.model.UsernameandPassword
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-@SuppressLint("SuspiciousIndentation", "UnusedMaterialScaffoldPaddingParameter")
+@SuppressLint("SuspiciousIndentation", "UnusedMaterialScaffoldPaddingParameter",
+    "CoroutineCreationDuringComposition"
+)
 @Composable
 fun LogInScreen(navController: NavController) {
 
@@ -29,6 +34,10 @@ fun LogInScreen(navController: NavController) {
     val username = remember { mutableStateOf("ramniwash") }
     val password = remember { mutableStateOf("2rxbjjbd") }
     var stateOfLoginButton = remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val dataStore = UserPreference(context)
+    var loginStatus by remember { mutableStateOf("") }
     Scaffold(topBar = {
         TopAppBar(
             modifier = Modifier
@@ -174,7 +183,11 @@ fun LogInScreen(navController: NavController) {
 
             } else if (logInResponseData.data != null) {
 
-                val Token = logInResponseData.data!!.token
+                var Token = logInResponseData.data!!.token
+
+                scope.launch {
+                    dataStore.saveLoginStatus(Token)
+                }
 
                 LaunchedEffect(Unit) {
                     delay(200)

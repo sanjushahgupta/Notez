@@ -1,5 +1,6 @@
 package compose.notezz.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,14 +15,23 @@ fun navigationNavController() {
     NavHost(navController = navController, startDestination = "welcome") {
         composable("welcome") {
             WelcomeScreen(navController = navController)
+            BackHandler() {
+                //
+            }
         }
 
         composable("signUp") {
             SignUpScreen(navController = navController)
+            BackHandler() {
+                //
+            }
         }
 
         composable("logIn") {
             LogInScreen(navController = navController)
+            BackHandler() {
+                //
+            }
         }
 
         composable("listofNotes/{token}") {
@@ -29,6 +39,9 @@ fun navigationNavController() {
                 it.arguments?.getString("token").toString(),
                 navController = navController
             )
+            BackHandler() {
+                //
+            }
         }
 
         composable("addNotes/{token}/{title}/{body}/{id}/{status}/{created}/{updated}/{userId}") {

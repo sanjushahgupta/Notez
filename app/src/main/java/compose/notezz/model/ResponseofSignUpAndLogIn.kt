@@ -2,6 +2,6 @@ package compose.notezz.model
 
 
 class ResponseofSignUpAndLogIn(
-    val token: String,
-    val refreshToken: String
+    var token: String,
+    var refreshToken: String
 )
