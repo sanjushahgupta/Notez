@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -82,7 +83,16 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
 
         } else if (notesResult.data != null) {
 
-            ListItem(authViewModel, token, navController, notesResult.data!!)
+            if(notesResult.data!!.isEmpty()){
+
+              Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top= 80.dp, start = 15.dp)){
+                  Text(text = "List is empty.", fontWeight = FontWeight.Bold)
+              }
+
+            }else {
+
+                ListItem(authViewModel, token, navController, notesResult.data!!)
+            }
 
         }
 

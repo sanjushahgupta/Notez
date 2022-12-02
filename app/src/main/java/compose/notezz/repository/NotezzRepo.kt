@@ -1,5 +1,6 @@
 package compose.notezz.repository
 
+import android.provider.ContactsContract.Data
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import compose.notezz.dataorexception.DataOrException
@@ -10,15 +11,7 @@ import javax.inject.Inject
 class NotezzRepo @Inject constructor(val api: NotezzApi) {
 
 
-    suspend fun signUpp(usernameandPassword: UsernameandPassword): DataOrException<ResponseofSignUpAndLogIn, Boolean, Exception> {
-        val response = try {
-            api.SignUp(usernameandPassword)
-        } catch (e: Exception) {
-            return DataOrException(e = e)
-        }
-        return DataOrException(data = response)
 
-    }
 
     suspend fun logIn(usernameandPassword: UsernameandPassword): DataOrException<ResponseofSignUpAndLogIn, Boolean, Exception> {
         val response = try {
@@ -65,6 +58,16 @@ class NotezzRepo @Inject constructor(val api: NotezzApi) {
         }
         return DataOrException(response)
 
+    }
+
+    suspend fun signUp(usernameandPassword: UsernameandPassword): DataOrException<ResponseofSignUpAndLogIn, Boolean, Exception>{
+
+        val response = try{
+            api.signUp(usernameandPassword)
+        }catch (e: Exception){
+            return DataOrException(e = e)
+        }
+        return DataOrException(response)
     }
 
 }

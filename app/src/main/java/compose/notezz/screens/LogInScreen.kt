@@ -148,7 +148,7 @@ fun LogInScreen(navController: NavController) {
         )
 
         Button(
-            onClick = {},
+            onClick = {navController.navigate("signUp")},
             //  colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue)
         ) {
             Icon(

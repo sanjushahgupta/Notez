@@ -5,12 +5,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -20,14 +18,23 @@ import androidx.navigation.NavController
 import compose.notezz.R
 import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.ResponseofSignUpAndLogIn
+import compose.notezz.model.UserPreference
 import compose.notezz.model.UsernameandPassword
+import compose.notezz.navigation.navigationNavController
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@SuppressLint("SuspiciousIndentation", "UnusedMaterialScaffoldPaddingParameter",
+    "CoroutineCreationDuringComposition")
 @Composable
 fun SignUpScreen(navController: NavController) {
     var authViewModel: AuthenticationViewModel = hiltViewModel()
     val username = remember { mutableStateOf("ramniwash") }
     val password = remember { mutableStateOf("2rxbjjbd") }
+    var signUpButtton = remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val dataStore = UserPreference(context)
 
     Scaffold(topBar = {
         TopAppBar(
@@ -123,7 +130,7 @@ fun SignUpScreen(navController: NavController) {
         Spacer(modifier = Modifier.padding(bottom = 12.dp))
 
         Button(
-            onClick = { },
+            onClick = {signUpButtton.value = true},
             colors = ButtonDefaults.buttonColors(
                 contentColor = Color.White, backgroundColor = Color(
                     R.color.blue
@@ -154,7 +161,7 @@ fun SignUpScreen(navController: NavController) {
         )
 
         Button(
-            onClick = {},
+            onClick = { navController.navigate("login")},
             colors = ButtonDefaults.buttonColors(Color(R.color.blue))
 
         ) {
@@ -174,19 +181,36 @@ fun SignUpScreen(navController: NavController) {
         }
         Spacer(modifier = Modifier.padding(bottom = 8.dp))
     }
-    val NotezzData = produceState<DataOrException<ResponseofSignUpAndLogIn, Boolean, Exception>>(
-        initialValue = DataOrException(loading = true)
-    ) {
-        val usernameandPassword = UsernameandPassword("shysdfjksd", "wioefhowi3ihoe4")
-        value = authViewModel.signUp(usernameandPassword)
-    }.value
+    if(signUpButtton.value) {
+        val NotezzData =
+            produceState<DataOrException<ResponseofSignUpAndLogIn, Boolean, Exception>>(
+                initialValue = DataOrException(loading = true)
+            ) {
+                val usernameandPassword = UsernameandPassword(username.value, password.value)
+                value = authViewModel.signUp(usernameandPassword)
+            }.value
 
-    if (NotezzData.loading == true) {
-        CircularProgressIndicator()
+        if (NotezzData.loading == true) {
 
-    } else if (NotezzData.data != null) {
-        Text(text = NotezzData.data?.token.toString())
+            CircularProgressIndicator()
+
+        } else if (NotezzData.data != null) {
+
+            var Token = NotezzData.data!!.token
+
+            scope.launch {
+                dataStore.saveLoginStatus(Token)
+            }
+
+            LaunchedEffect(Unit) {
+                delay(200)
+                navController.navigate("listofNotes/$Token")
+            }
+
+        } else {
+
+            Text(text = NotezzData.e?.message.toString())
+        }
     }
-
 
 }

@@ -6,7 +6,7 @@ import retrofit2.http.*
 interface NotezzApi {
 
     @POST("/auth/signup")
-    suspend fun SignUp(@Body register: UsernameandPassword): ResponseofSignUpAndLogIn
+    suspend fun signUp(@Body register: UsernameandPassword): ResponseofSignUpAndLogIn
 
     @POST("/auth/signin")
     suspend fun LogIn(@Body usernameandPassword: UsernameandPassword): ResponseofSignUpAndLogIn
@@ -29,4 +29,6 @@ interface NotezzApi {
 
     @PATCH("/notes/{id}")
     suspend fun updateNote(@Header("Authorization") token: String, @Path("id") id:Int, @Body UpdateNoteRequest: updateNoteRequest):Note
+
+
 }
