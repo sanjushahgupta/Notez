@@ -25,20 +25,30 @@ import compose.notezz.model.updateNoteRequest
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun AddandEditScreen(token: String, titlee:String ="", bodyy:String ="", idof:Int = 0, status:String = "active",updated: String = "",created: String = "", userIdd:Int = 0,navController: NavController) {
+fun AddandEditScreen(
+    token: String,
+    titlee: String,
+    bodyy: String,
+    noteId: String,
+    status: String,
+    updated: String,
+    created: String,
+    userId: String,
+    navController: NavController
+) {
 
     val authViewModel: AuthenticationViewModel = hiltViewModel()
-    val title = remember { mutableStateOf(titlee)}
+    val title = remember { mutableStateOf(titlee) }
     val body = remember { mutableStateOf(bodyy) }
+
     val addState = remember { mutableStateOf(false) }
     val updateState = remember { mutableStateOf(false) }
 
 
     Scaffold(topBar = {
         TopAppBar(
-            modifier = Modifier
-                .fillMaxWidth(),
-            backgroundColor = Color.DarkGray) {
+            modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
+        ) {
 
             Icon(
                 modifier = Modifier.padding(start = 10.dp),
@@ -56,10 +66,12 @@ fun AddandEditScreen(token: String, titlee:String ="", bodyy:String ="", idof:In
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 10.dp, start = 10.dp, end = 10.dp), elevation = 20.dp
+                    .padding(top = 10.dp, start = 10.dp, end = 10.dp),
+                elevation = 20.dp
             ) {
                 OutlinedTextField(value = title.value,
                     onValueChange = { title.value = it },
@@ -80,78 +92,82 @@ fun AddandEditScreen(token: String, titlee:String ="", bodyy:String ="", idof:In
                     placeholder = { Text(text = "Note description") })
             }
             Spacer(modifier = Modifier.padding(top = 20.dp))
-            Button(onClick = { addState.value = true }, modifier = Modifier.wrapContentSize()) {
-                Icon(
-                    painter = painterResource(id = compose.notezz.R.drawable.ic_baseline_save_24),
-                    contentDescription = "save"
-                )
-                Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-                // Spacer(modifier = Modifier.size(ButtonDefaults.IconSize))
-                Text("Add Note")
-            }
-            Spacer(modifier = Modifier.padding(20.dp))
-            Button(onClick = { updateState.value = true }, modifier = Modifier.wrapContentSize()) {
-                Icon(
-                    painter = painterResource(id = compose.notezz.R.drawable.ic_baseline_save_24),
-                    contentDescription = "update"
-                )
-                Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-                // Spacer(modifier = Modifier.size(ButtonDefaults.IconSize))
-                Text("Update Note")
+            if (noteId.equals("idis0")) {
+                Button(onClick = { addState.value = true }, modifier = Modifier.wrapContentSize()) {
+                    Icon(
+                        painter = painterResource(id = compose.notezz.R.drawable.ic_baseline_save_24),
+                        contentDescription = "save"
+                    )
+
+                    // Spacer(modifier = Modifier.size(ButtonDefaults.IconSize))
+                    Text("Add Note")
+                }
+
+            } else if (!noteId.equals("idis0")) {
+                Button(
+                    onClick = { updateState.value = true },
+                    modifier = Modifier.wrapContentSize()
+                ) {
+                    Icon(
+                        painter = painterResource(id = compose.notezz.R.drawable.ic_baseline_save_24),
+                        contentDescription = "update"
+                    )
+                    // Spacer(modifier = Modifier.size(ButtonDefaults.IconSize))
+                    Text("Update Note")
+                }
             }
         }
     }
 
 
-
-
     val noteInfo = NoteInfo(title.value, body.value, status = "active")
-
     if (addState.value == true) {
         val context = LocalContext.current
-        val response =
-            produceState<DataOrException<Note, Boolean, Exception>>(
-                initialValue = DataOrException(
-                    loading = true
-                )
-            ) {
-                value = authViewModel.addNote("Bearer" + " " + token, noteInfo)
-            }.value
+        val response = produceState<DataOrException<Note, Boolean, Exception>>(
+            initialValue = DataOrException(
+                loading = true
+            )
+        ) {
+            value = authViewModel.addNote("Bearer" + " " + token, noteInfo)
+        }.value
 
         if (response.loading == true) {
             CircularProgressIndicator()
-        }else if (response.data  != null) {
+        } else if (response.data != null) {
+
             navController.navigate("listofNotes/$token")
-            Toast.makeText(context, "Note Added", Toast.LENGTH_LONG).show()
             addState.value = false
-        }else{
+        } else {
             Toast.makeText(context, "Something went wrong, Try again", Toast.LENGTH_LONG).show()
         }
     }
 
     //update
 
-    if (updateState.value == true || idof != 0) {
-        val updateNote = updateNoteRequest(title.value, body.value, status = "active", id  =idof,created, updated, userid =userIdd,)
+
+    if (updateState.value == true) {
         val context = LocalContext.current
-        val response =
-            produceState<DataOrException<Note, Boolean, Exception>>(
-                initialValue = DataOrException(
-                    loading = true
-                )
-            ) {
-               value = authViewModel.updateNote("Bearer" + " " + token, idof, updateNoteRequest = updateNote)
-            }.value
+        val note_id = noteId.toInt()
+        val user_id = userId.toInt()
+        val updateNote =
+            updateNoteRequest(title.value, body.value, status, note_id, user_id, created, updated)
+
+        val response = produceState<DataOrException<Note, Boolean, Exception>>(
+            initialValue = DataOrException(
+                loading = true
+            )
+        ) {
+            value = authViewModel.updateNote("Bearer" + " " + token, note_id, updateNote)
+        }.value
 
         if (response.loading == true) {
             CircularProgressIndicator()
 
-        }else if (response.data  == null) {
+        } else if (response.data != null) {
             navController.navigate("listofNotes/$token")
 
-            Toast.makeText(context, response.data!!.id, Toast.LENGTH_LONG).show()
             updateState.value = false
-        }else{
+        } else {
             Toast.makeText(context, "Something went wrong, Try again", Toast.LENGTH_LONG).show()
         }
     }

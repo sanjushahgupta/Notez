@@ -48,7 +48,7 @@ class AuthenticationViewModel @Inject constructor(val notezzRepo: NotezzRepo) : 
     }
 
    suspend fun updateNote(token: String, id: Int, updateNoteRequest: updateNoteRequest): DataOrException<Note, Boolean, Exception>{
-       return notezzRepo.updateNote("Bearer" + " " +token,id,updateNoteRequest)
+       return notezzRepo.updateNote(token,id,updateNoteRequest)
    }
 
 

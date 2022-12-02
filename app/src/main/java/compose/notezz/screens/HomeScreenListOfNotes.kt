@@ -1,6 +1,7 @@
 package compose.notezz.screens
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,6 +19,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -66,9 +68,12 @@ fun HomeScreenListOfNotes(tokenfromRoomDB: String, navController: NavController)
             ListItem(authViewModel, tokenfromRoomDB, navController, notesResult.data!!)
 
         }
+
         Scaffold(floatingActionButton = {
             FloatingActionButton(
-                onClick = { navController.navigate("addNotes/$tokenfromRoomDB/title/body/id/status/created/updated/userId") },
+                onClick = {
+
+                    navController.navigate("addNotes/$tokenfromRoomDB/title/body/idis0/status/created/updated/userId") },
                 backgroundColor = Color.Cyan
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "To add Notes")
@@ -108,6 +113,7 @@ fun ListItem(
                 ) {
                     Text(text = item.title, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                     Text(item.body, modifier = Modifier.padding(bottom = 10.dp))
+
                     Row {
 
                         Icon(
@@ -115,8 +121,7 @@ fun ListItem(
                             contentDescription = "edit",
                             modifier = Modifier
                                 .padding(end = 20.dp)
-
-                                .clickable { navController.navigate("addNotes/$token/${item.title}/${item.body}/${item.id}/${item.status}/${item.created}/${item.updated}/${item.userId}") }
+                               .clickable { navController.navigate("addNotes/$token/${item.title}/${item.body}/${item.id}/${item.status}/${item.created}/${item.created}/${item.userId}") }
                         )
                         Spacer(Modifier.weight(1f))
                         Icon(
@@ -156,33 +161,3 @@ fun Delete(
         authenticationViewModel.deleteNote(token, id)
     }
 }
-
-
-/*@Composable
-fun ListItem(data:ArrayList<Note>){
-    LazyColumn(modifier = Modifier
-        .fillMaxWidth()
-        .wrapContentHeight()
-        .padding(bottom = 50.dp)){
-        items(data) { item ->
-            Card(modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .padding(10.dp), shape = RoundedCornerShape(20), elevation = 20.dp) {
-                Row(){
-                    Column(
-                        modifier = Modifier
-                            .padding(6.dp)
-                            .fillMaxWidth()
-                    ) {
-                        Text(text = item.title, fontWeight = FontWeight.Bold)
-                        Text(item.body)
-                    }
-                    val mutablestatetodelete = remember{ mutableStateOf(false) }
-                    Icon(imageVector = Icons.Default.Delete, contentDescription ="Delete",modifier = Modifier.clickable { mutablestatetodelete })
-                }
-            }
-
-        }
-    }
-}*/

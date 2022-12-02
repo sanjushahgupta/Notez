@@ -28,5 +28,5 @@ interface NotezzApi {
     //Request Method: PATCH
 
     @PATCH("/notes/{id}")
-    suspend fun updateNote(@Header("Authorization") token: String, @Path("id") id:Int, @Body updateNoteRequest: updateNoteRequest):Note
+    suspend fun updateNote(@Header("Authorization") token: String, @Path("id") id:Int, @Body UpdateNoteRequest: updateNoteRequest):Note
 }

@@ -36,11 +36,11 @@ fun navigationNavController() {
                 it.arguments?.getString("token").toString(),
                 it.arguments?.getString("title").toString(),
                 it.arguments?.getString("body").toString(),
-                it.arguments?.getInt("id")!!.toInt(),
+                it.arguments?.getString("id").toString(),
                 it.arguments?.getString("status").toString(),
                 it.arguments?.getString("created").toString(),
                 it.arguments?.getString("updated").toString(),
-                it.arguments?.getInt("userId")!!.toInt(),
+                it.arguments?.getString("userId")!!.toString(),
                 navController = navController
             )
         }
