@@ -3,10 +3,7 @@ package compose.notezz.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import compose.notezz.dataorexception.DataOrException
-import compose.notezz.model.Note
-import compose.notezz.model.NoteInfo
-import compose.notezz.model.ResponseofSignUpAndLogIn
-import compose.notezz.model.UsernameandPassword
+import compose.notezz.model.*
 import compose.notezz.repository.NotezzRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -48,7 +45,11 @@ class AuthenticationViewModel @Inject constructor(val notezzRepo: NotezzRepo) : 
         viewModelScope.launch {
             notezzRepo.deleteNote("Bearer" + " " + token, id)
         }
-
-
     }
+
+   suspend fun updateNote(token: String, id: Int, updateNoteRequest: updateNoteRequest): DataOrException<Note, Boolean, Exception>{
+       return notezzRepo.updateNote("Bearer" + " " +token,id,updateNoteRequest)
+   }
+
+
 }

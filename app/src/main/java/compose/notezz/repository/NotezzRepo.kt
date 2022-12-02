@@ -1,10 +1,7 @@
 package compose.notezz.repository
 
 import compose.notezz.dataorexception.DataOrException
-import compose.notezz.model.Note
-import compose.notezz.model.NoteInfo
-import compose.notezz.model.ResponseofSignUpAndLogIn
-import compose.notezz.model.UsernameandPassword
+import compose.notezz.model.*
 import compose.notezz.network.NotezzApi
 import javax.inject.Inject
 
@@ -55,8 +52,16 @@ class NotezzRepo @Inject constructor(val api: NotezzApi) {
         api.deleteNote(token, id)
     }
 
-    suspend fun updateNote(token: String, id:Int, note: Note){
-        api.updateNote(token, id,note)
+    suspend fun updateNote(token: String, id:Int, updateNoteRequest: updateNoteRequest): DataOrException<Note, Boolean, Exception>{
+        val response = try{
+        api.updateNote(token, id,updateNoteRequest)
+
+        }catch(e: Exception){
+            return DataOrException(e= e)
+
+        }
+        return DataOrException(response)
+
     }
 
 }

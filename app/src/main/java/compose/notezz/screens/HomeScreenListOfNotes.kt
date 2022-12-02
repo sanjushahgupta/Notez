@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.room.Update
 import compose.notezz.R
 import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.Note
@@ -44,6 +43,7 @@ fun HomeScreenListOfNotes(tokenfromRoomDB: String, navController: NavController)
             modifier = Modifier
                 .fillMaxWidth(),
             backgroundColor = Color.DarkGray
+
         ) {
 
             Icon(
@@ -63,12 +63,12 @@ fun HomeScreenListOfNotes(tokenfromRoomDB: String, navController: NavController)
 
         } else if (notesResult.data != null) {
 
-            ListItem(authViewModel, tokenfromRoomDB,navController, notesResult.data!!)
+            ListItem(authViewModel, tokenfromRoomDB, navController, notesResult.data!!)
 
         }
         Scaffold(floatingActionButton = {
             FloatingActionButton(
-                onClick = { navController.navigate("addNotes/$tokenfromRoomDB") },
+                onClick = { navController.navigate("addNotes/$tokenfromRoomDB/title/body/id/status/created/updated/userId") },
                 backgroundColor = Color.Cyan
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "To add Notes")
@@ -113,8 +113,10 @@ fun ListItem(
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "edit",
-                            modifier = Modifier.padding(end = 20.dp)
-                                .clickable{navController.navigate("addNotes/$token")}
+                            modifier = Modifier
+                                .padding(end = 20.dp)
+
+                                .clickable { navController.navigate("addNotes/$token/${item.title}/${item.body}/${item.id}/${item.status}/${item.created}/${item.updated}/${item.userId}") }
                         )
                         Spacer(Modifier.weight(1f))
                         Icon(

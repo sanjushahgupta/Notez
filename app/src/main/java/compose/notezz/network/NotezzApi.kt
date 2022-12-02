@@ -1,9 +1,6 @@
 package compose.notezz.network
 
-import compose.notezz.model.Note
-import compose.notezz.model.NoteInfo
-import compose.notezz.model.ResponseofSignUpAndLogIn
-import compose.notezz.model.UsernameandPassword
+import compose.notezz.model.*
 import retrofit2.http.*
 
 interface NotezzApi {
@@ -31,5 +28,5 @@ interface NotezzApi {
     //Request Method: PATCH
 
     @PATCH("/notes/{id}")
-    suspend fun updateNote(@Header("Authorization") token: String, @Path("id") id:Int, @Body note: Note):Note
+    suspend fun updateNote(@Header("Authorization") token: String, @Path("id") id:Int, @Body updateNoteRequest: updateNoteRequest):Note
 }

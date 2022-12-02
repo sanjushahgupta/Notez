@@ -21,15 +21,18 @@ import androidx.navigation.NavController
 import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.Note
 import compose.notezz.model.NoteInfo
+import compose.notezz.model.updateNoteRequest
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun AddandEditScreen(token: String, navController: NavController) {
+fun AddandEditScreen(token: String, titlee:String ="", bodyy:String ="", idof:Int = 0, status:String = "active",updated: String = "",created: String = "", userIdd:Int = 0,navController: NavController) {
 
     val authViewModel: AuthenticationViewModel = hiltViewModel()
-    val title = remember { mutableStateOf("") }
-    val body = remember { mutableStateOf("") }
+    val title = remember { mutableStateOf(titlee)}
+    val body = remember { mutableStateOf(bodyy) }
     val addState = remember { mutableStateOf(false) }
+    val updateState = remember { mutableStateOf(false) }
+
 
     Scaffold(topBar = {
         TopAppBar(
@@ -86,8 +89,21 @@ fun AddandEditScreen(token: String, navController: NavController) {
                 // Spacer(modifier = Modifier.size(ButtonDefaults.IconSize))
                 Text("Add Note")
             }
+            Spacer(modifier = Modifier.padding(20.dp))
+            Button(onClick = { updateState.value = true }, modifier = Modifier.wrapContentSize()) {
+                Icon(
+                    painter = painterResource(id = compose.notezz.R.drawable.ic_baseline_save_24),
+                    contentDescription = "update"
+                )
+                Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
+                // Spacer(modifier = Modifier.size(ButtonDefaults.IconSize))
+                Text("Update Note")
+            }
         }
     }
+
+
+
 
     val noteInfo = NoteInfo(title.value, body.value, status = "active")
 
@@ -112,4 +128,32 @@ fun AddandEditScreen(token: String, navController: NavController) {
             Toast.makeText(context, "Something went wrong, Try again", Toast.LENGTH_LONG).show()
         }
     }
+
+    //update
+
+    if (updateState.value == true || idof != 0) {
+        val updateNote = updateNoteRequest(title.value, body.value, status = "active", id  =idof,created, updated, userid =userIdd,)
+        val context = LocalContext.current
+        val response =
+            produceState<DataOrException<Note, Boolean, Exception>>(
+                initialValue = DataOrException(
+                    loading = true
+                )
+            ) {
+               value = authViewModel.updateNote("Bearer" + " " + token, idof, updateNoteRequest = updateNote)
+            }.value
+
+        if (response.loading == true) {
+            CircularProgressIndicator()
+
+        }else if (response.data  == null) {
+            navController.navigate("listofNotes/$token")
+
+            Toast.makeText(context, response.data!!.id, Toast.LENGTH_LONG).show()
+            updateState.value = false
+        }else{
+            Toast.makeText(context, "Something went wrong, Try again", Toast.LENGTH_LONG).show()
+        }
+    }
+
 }
