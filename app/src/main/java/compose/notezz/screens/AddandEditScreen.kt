@@ -138,7 +138,7 @@ fun AddandEditScreen(
             navController.navigate("listofNotes/$token")
             addState.value = false
         } else {
-            Toast.makeText(context, "Something went wrong, Try again", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, response.e?.message.toString(), Toast.LENGTH_LONG).show()
         }
     }
 

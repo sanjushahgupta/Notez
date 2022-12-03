@@ -86,7 +86,7 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
             if(notesResult.data!!.isEmpty()){
 
               Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top= 80.dp, start = 15.dp)){
-                  Text(text = "List is empty.", fontWeight = FontWeight.Bold)
+                  Text(text = "No notes", fontWeight = FontWeight.Bold)
               }
 
             }else {

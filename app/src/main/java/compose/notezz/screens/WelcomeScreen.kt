@@ -3,6 +3,7 @@ package compose.notezz.screens
 import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -37,9 +38,6 @@ fun WelcomeScreen(navController: NavController) {
     val scope = rememberCoroutineScope()
     val dataStore = UserPreference(context)
 
-
-
-
         scope.launch {
             dataStore.loginStatus.collect {
                val token = it.toString()
@@ -47,7 +45,7 @@ fun WelcomeScreen(navController: NavController) {
                     delay(2000)
                     if (token.equals("0")) {
 
-                        navController.navigate("login")
+                        navController.navigate("logIn")
                     }else{
                         navController.navigate("listofNotes/$token")
                     }
@@ -56,124 +54,15 @@ fun WelcomeScreen(navController: NavController) {
             }
         }
 
+    val infiniteTransition = rememberInfiniteTransition()
+    val heartSize by infiniteTransition.animateFloat(
+        initialValue = 300.0f,
+        targetValue = 250.0f,
+        animationSpec = infiniteRepeatable(animation = tween(900, 900, FastOutLinearInEasing), repeatMode = RepeatMode.Reverse)
+    )
+    Image(painter = painterResource(id = compose.notezz.R.drawable.logo),
+        contentDescription = "logo",
+        modifier = Modifier.size(heartSize.dp)
+    )
 
-
-        Scaffold(topBar = {
-            TopAppBar(
-                modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
-
-
-            ) {
-
-                Icon(
-                    modifier = Modifier.padding(start = 10.dp),
-                    tint = Color.Cyan,
-                    painter = painterResource(id = compose.notezz.R.drawable.logo),
-                    contentDescription = "logo"
-                )
-                Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
-            }
-        }) {}
-        Box(
-            modifier = Modifier
-                .aspectRatio(1.0f)
-                .clip(CircleShape)
-        ) {
-
-            // Vinyl background
-            Image(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .rotate(0.5f),
-                painter = painterResource(id = compose.notezz.R.drawable.landingp),
-                contentDescription = ""
-            )
-
-            // Vinyl lights effect
-            Image(
-                modifier = Modifier.fillMaxSize(),
-                painter = painterResource(id =  compose.notezz.R.drawable.landingp),
-                contentDescription = "",
-            )
-
-            // Vinyl 'album' cover
-            // For using with Coil or Glide, wrap into surface with shape
-            Image(
-                modifier = Modifier
-                    .fillMaxSize(0.3f)
-                    .align(Alignment.Center)
-                    .rotate(0.5f)
-                    .aspectRatio(1.0f)
-                    .clip(CircleShape),
-                painter = painterResource(compose.notezz.R.drawable.landingp),
-                contentDescription = "")
-
-        }
 }
-
-      /*  Box(modifier = Modifier.padding(top = 50.dp)) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp, end = 10.dp, start = 10.dp),
-
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                Text(
-                    "Simple & free note taking " + "tool",
-                    textAlign = TextAlign.Center,
-                    style = typography.h4,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                Text(
-                    "Take notes online without worrying about installing, customizing, learning, getting-used-to" + "paying, security, privacy or anything else basically. ",
-                    modifier = Modifier.padding(bottom = 12.dp)
-
-                )
-                Spacer(Modifier.padding(bottom = 20.dp))
-
-                Row(horizontalArrangement = Arrangement.Center) {
-                    Button(
-                        onClick = { navController.navigate("logIn") },
-                        // colors = ButtonDefaults.buttonColors(Color.Blue)
-                    ) {
-                        Icon(
-                            tint = Color.White,
-                            painter = painterResource(id = compose.notezz.R.drawable.ic_baseline_login_24),
-                            contentDescription = "login"
-                        )
-                        Text(text = "Log In", color = Color.White)
-
-                    }
-
-                    Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-
-                    Button(
-                        onClick = { navController.navigate("signUp") },
-                        // colors = ButtonDefaults.buttonColors(Color.Blue),
-                        modifier = Modifier.wrapContentSize(),
-
-                        ) {
-                        Icon(
-                            tint = Color.White,
-                            painter = painterResource(id = compose.notezz.R.drawable.ic_baseline_person_24),
-                            contentDescription = ""
-                        )
-
-                        Text(text = "Sign Up", color = Color.White)
-
-                    }
-
-
-                }
-                Spacer(Modifier.padding(bottom = 28.dp))
-
-                Image(
-                    painter = painterResource(id = compose.notezz.R.drawable.landingp),
-                    contentDescription = ""
-                )
-            }
-        }*/
