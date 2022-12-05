@@ -31,7 +31,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "CoroutineCreationDuringComposition",
+    "SuspiciousIndentation"
+)
 @Composable
 fun WelcomeScreen(navController: NavController) {
     val context = LocalContext.current
@@ -47,14 +49,21 @@ fun WelcomeScreen(navController: NavController) {
 
                         navController.navigate("logIn")
                     }else{
-                        navController.navigate("listofNotes/$token")
+                       // navController.navigate("listofNotes/$token")
+                        navController.navigate("logIn")
                     }
                 }.await()
 
             }
         }
 
-    val infiniteTransition = rememberInfiniteTransition()
+    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally){
+        Image(painter = painterResource(id = compose.notezz.R.drawable.spalsh), contentDescription ="")
+    }
+
+
+
+  /*  val infiniteTransition = rememberInfiniteTransition()
     val heartSize by infiniteTransition.animateFloat(
         initialValue = 300.0f,
         targetValue = 250.0f,
@@ -63,6 +72,6 @@ fun WelcomeScreen(navController: NavController) {
     Image(painter = painterResource(id = compose.notezz.R.drawable.logo),
         contentDescription = "logo",
         modifier = Modifier.size(heartSize.dp)
-    )
+    )*/
 
 }

@@ -1,16 +1,23 @@
 package compose.notezz.screens
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -26,6 +33,7 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("SuspiciousIndentation", "UnusedMaterialScaffoldPaddingParameter",
     "CoroutineCreationDuringComposition")
+
 @Composable
 fun SignUpScreen(navController: NavController) {
     var authViewModel: AuthenticationViewModel = hiltViewModel()
@@ -53,8 +61,12 @@ fun SignUpScreen(navController: NavController) {
         }
     }) {}
 
+var focus = LocalFocusManager.current
     Column(
         modifier = Modifier
+            .clickable(MutableInteractionSource(),
+                indication = null,
+                onClick = { focus.clearFocus() })
             .fillMaxWidth()
             .fillMaxWidth()
             .padding(start = 10.dp, end = 10.dp),
@@ -72,7 +84,8 @@ fun SignUpScreen(navController: NavController) {
         Text(
             text = "Register below and start taking notes in seconds.",
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
-            fontSize = 16.sp
+            fontSize = 16.sp,
+
             // color = Color(R.color.textColor)
         )
 
@@ -86,7 +99,8 @@ fun SignUpScreen(navController: NavController) {
             value = username.value,
             onValueChange = { username.value = it },
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
 
         )
 
@@ -101,7 +115,11 @@ fun SignUpScreen(navController: NavController) {
             value = password.value,
             onValueChange = { password.value = it },
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            visualTransformation = PasswordVisualTransformation(),
+            colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
 
         )
         Spacer(modifier = Modifier.padding(bottom = 15.dp))

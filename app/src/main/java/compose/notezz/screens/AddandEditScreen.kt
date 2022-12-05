@@ -2,19 +2,24 @@ package compose.notezz.screens
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.substring
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -22,7 +27,9 @@ import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.Note
 import compose.notezz.model.NoteInfo
 import compose.notezz.model.updateNoteRequest
+import compose.notezz.util.Dimension
 
+@OptIn(ExperimentalComposeUiApi::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun AddandEditScreen(
@@ -38,9 +45,8 @@ fun AddandEditScreen(
 ) {
 
     val authViewModel: AuthenticationViewModel = hiltViewModel()
-    val title = remember { mutableStateOf(titlee) }
-    val body = remember { mutableStateOf(bodyy) }
-
+    var title = remember { mutableStateOf("") }
+    val body = remember { mutableStateOf("") }
     val addState = remember { mutableStateOf(false) }
     val updateState = remember { mutableStateOf(false) }
 
@@ -56,54 +62,63 @@ fun AddandEditScreen(
                 painter = painterResource(id = compose.notezz.R.drawable.logo),
                 contentDescription = "logo"
             )
-            Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
         }
     }) {}
 
+    val focus = LocalFocusManager.current
     Box(modifier = Modifier.fillMaxWidth(), Alignment.Center) {
         Column(
-            modifier = Modifier.padding(top = 55.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
+            modifier = Modifier.padding(top = 55.dp)
+                .clickable(MutableInteractionSource(),
+        indication = null,
+        onClick = { focus.clearFocus() }),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally)
+        {
             Card(
                 modifier = Modifier
+                   // .verticalScroll(ScrollState(1),true,)
                     .fillMaxWidth()
-                    .padding(top = 10.dp, start = 10.dp, end = 10.dp),
-                elevation = 20.dp
+                    .height(Dimension.height(value = 10f).dp)
+                    ,elevation = 20.dp
             ) {
                 OutlinedTextField(value = title.value,
-                    onValueChange = { title.value = it },
+                    onValueChange = { title.value = it},
                     modifier = Modifier.padding(5.dp),
-                    placeholder = { Text("Note title") })
+                    placeholder = { Text("Note title") },
+                    maxLines = 1,
+                colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black))
             }
+
             Spacer(modifier = Modifier.padding(top = 20.dp))
             Card(
                 modifier = Modifier
-                    .padding(start = 10.dp, end = 10.dp)
+                    .verticalScroll(ScrollState(1),true)
                     .fillMaxWidth()
-                    .fillMaxHeight(0.4f),
+                    .height(Dimension.height(value = 35f).dp),
                 elevation = 20.dp,
             ) {
                 OutlinedTextField(value = body.value,
                     onValueChange = { body.value = it },
+                    colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black),
                     modifier = Modifier.padding(5.dp),
                     placeholder = { Text(text = "Note description") })
             }
             Spacer(modifier = Modifier.padding(top = 20.dp))
             if (noteId.equals("idis0")) {
+
                 Button(onClick = { addState.value = true }, modifier = Modifier.wrapContentSize()) {
                     Icon(
                         painter = painterResource(id = compose.notezz.R.drawable.ic_baseline_save_24),
                         contentDescription = "save"
                     )
-
                     // Spacer(modifier = Modifier.size(ButtonDefaults.IconSize))
                     Text("Add Note")
                 }
 
             } else if (!noteId.equals("idis0")) {
+                title.value = titlee
+                body.value = bodyy
                 Button(
                     onClick = { updateState.value = true },
                     modifier = Modifier.wrapContentSize()

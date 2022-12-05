@@ -1,6 +1,8 @@
 package compose.notezz.screens
 
 import android.annotation.SuppressLint
+import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,7 +12,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,7 +27,10 @@ import compose.notezz.R
 import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.Note
 import compose.notezz.model.UserPreference
+import compose.notezz.util.Dimension
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Scope
 
 @SuppressLint("SuspiciousIndentation", "UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -36,7 +40,7 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val dataStore = UserPreference(context)
-   var loginStatus by remember { mutableStateOf("") }
+    var loginStatus by remember { mutableStateOf("") }
 
     val notesResult = produceState<DataOrException<ArrayList<Note>, Boolean, Exception>>(
         initialValue = DataOrException(loading = true)
@@ -58,7 +62,7 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "logo"
             )
-                Spacer(Modifier.weight(1f))
+            Spacer(Modifier.weight(1f))
             Icon(tint = Color.White,
                 painter = painterResource(id = R.drawable.ic_baseline_logout_24),
                 contentDescription = "logout",
@@ -83,13 +87,16 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
 
         } else if (notesResult.data != null) {
 
-            if(notesResult.data!!.isEmpty()){
+            if (notesResult.data!!.isEmpty()) {
 
-              Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top= 80.dp, start = 15.dp)){
-                  Text(text = "No notes", fontWeight = FontWeight.Bold)
-              }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(top = 80.dp, start = 15.dp)
+                ) {
+                    Text(text = "No notes", fontWeight = FontWeight.Bold)
+                }
 
-            }else {
+            } else {
 
                 ListItem(authViewModel, token, navController, notesResult.data!!)
             }
@@ -100,7 +107,8 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
             FloatingActionButton(
                 onClick = {
 
-                    navController.navigate("addNotes/$token/title/body/idis0/status/created/updated/userId") },
+                    navController.navigate("addNotes/$token/title/body/idis0/status/created/updated/userId")
+                },
                 backgroundColor = Color.Cyan
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "To add Notes")
@@ -110,6 +118,7 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
 }
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ListItem(
     authenticationViewModel: AuthenticationViewModel,
@@ -121,34 +130,43 @@ fun ListItem(
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(bottom = 50.dp)
+            .width(Dimension.width(value = 82f).dp)
+            .height(Dimension.height(value = 82f).dp)
+            .background(Color.LightGray)
     ) {
         items(data) { item ->
-            val mutablestatetodelete = remember { mutableStateOf(false) }
+            var mutablestatetodelete by remember { mutableStateOf(false) }
             Card(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
+                    .width(Dimension.width(value = 100f).dp)
+                    .height(Dimension.height(value = 12f).dp)
                     .padding(10.dp), shape = RoundedCornerShape(20), elevation = 20.dp
             ) {
 
                 Column(
                     modifier = Modifier
-                        .padding(6.dp)
                         .fillMaxWidth()
+                        .clickable(
+                            true,
+                            null,
+                            null,
+                            onClick = { navController.navigate("addNotes/$token/${item.title}/${item.body}/${item.id}/${item.status}/${item.created}/${item.created}/${item.userId}") })
                 ) {
-                    Text(text = item.title, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                    Text(item.body, modifier = Modifier.padding(bottom = 10.dp))
+
+
+                    var trimtitle = item.title
+                    var trimbody = item.body
 
                     Row {
-
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "edit",
-                            modifier = Modifier
-                                .padding(end = 20.dp)
-                                .clickable { navController.navigate("addNotes/$token/${item.title}/${item.body}/${item.id}/${item.status}/${item.created}/${item.created}/${item.userId}") }
+                        if (trimtitle.length > 30) {
+                            trimtitle = item.title.substring(0, 28) + ".."
+                        }
+                        Text(
+                            text = trimtitle,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            maxLines = 1,
+                            modifier = Modifier.padding(start = 6.dp, top = 8.dp)
                         )
                         Spacer(Modifier.weight(1f))
                         Icon(
@@ -156,18 +174,24 @@ fun ListItem(
                             contentDescription = "Delete",
                             modifier = Modifier
                                 .clickable {
-                                    mutablestatetodelete.value = true
+                                    mutablestatetodelete = true
                                 }
-                                .wrapContentSize(), tint = Color.Red
-
+                                .padding(end = 6.dp)
+                                .wrapContentSize(),
+                            tint = Color.Red,
                         )
-
-                        val id = item.id
-                        Delete(authenticationViewModel, token, id, mutablestatetodelete.value)
-
+                        if (mutablestatetodelete) {
+                            Delete(authenticationViewModel, token, item.id)
+                        }
 
                     }
-
+                    if (trimbody.length > 40) {
+                        trimbody = item.body.substring(0, 40) + ".."
+                    }
+                    Text(
+                        trimbody,
+                        modifier = Modifier.padding(bottom = 5.dp, start = 6.dp, top = 7.dp)
+                    )
                 }
 
             }
@@ -176,15 +200,35 @@ fun ListItem(
     }
 }
 
-@SuppressLint("ProduceStateDoesNotAssignValue")
+@SuppressLint(/* ...value = */ "ProduceStateDoesNotAssignValue")
 @Composable
 fun Delete(
     authenticationViewModel: AuthenticationViewModel,
     token: String,
-    id: Int,
-    stateofdelete: Boolean
+    id: Int
 ) {
-    if (stateofdelete == true) {
-        authenticationViewModel.deleteNote(token, id)
+    var stateOfAlertBox by remember { mutableStateOf(true) }
+    if(stateOfAlertBox) {
+        AlertDialog(
+            onDismissRequest = { stateOfAlertBox = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        authenticationViewModel.deleteNote(token, id)
+                        stateOfAlertBox = false
+                              },
+                ) {
+                    Text("Yes")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { stateOfAlertBox = false }) {
+                    Text("No")
+                }
+            },
+            title = { Text("Are you sure you want to delete this item?") },
+        )
+
     }
+
 }
