@@ -1,5 +1,7 @@
 package compose.notezz.screens
 
+import android.provider.ContactsContract
+import android.provider.ContactsContract.CommonDataKinds.Email
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import compose.notezz.dataorexception.DataOrException
@@ -49,6 +51,21 @@ class AuthenticationViewModel @Inject constructor(val notezzRepo: NotezzRepo) : 
    }
     suspend fun signUp(usernameandPassword: UsernameandPassword): DataOrException<ResponseofSignUpAndLogIn, Boolean, Exception>{
         return notezzRepo.signUp(usernameandPassword)
+    }
+
+    suspend fun forgotPassword(userEmail:UserEmail):DataOrException<Any, Boolean, Exception>{
+
+
+            return notezzRepo.forgotPassword(userEmail)
+
+
+    }
+
+    fun updateAccount(token: String, accountDetails: AccountDetails){
+        viewModelScope.launch {
+            notezzRepo.updateAccount(token, accountDetails)
+        }
+
     }
 
 

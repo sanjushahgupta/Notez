@@ -1,5 +1,6 @@
 package compose.notezz.repository
 
+import android.provider.ContactsContract
 import android.provider.ContactsContract.Data
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -69,5 +70,20 @@ class NotezzRepo @Inject constructor(val api: NotezzApi) {
         }
         return DataOrException(response)
     }
+
+    suspend fun forgotPassword(userEmail:  UserEmail):DataOrException<Any, Boolean, Exception>{
+
+        val response = try{
+            api.forgotPassword(userEmail)
+        }catch (e: Exception){
+            return DataOrException(e = e)
+        }
+        return DataOrException(response)
+
+    }
+
+suspend fun updateAccount(token: String, accountDetails: AccountDetails){
+    api.updateAccount(token, accountDetails)
+}
 
 }

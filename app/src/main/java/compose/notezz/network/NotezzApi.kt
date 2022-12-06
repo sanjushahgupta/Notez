@@ -1,6 +1,8 @@
 package compose.notezz.network
 
+import android.provider.ContactsContract.CommonDataKinds.Email
 import compose.notezz.model.*
+import retrofit2.Response
 import retrofit2.http.*
 
 interface NotezzApi {
@@ -24,11 +26,16 @@ interface NotezzApi {
     @DELETE("/notes/{id}")
     suspend fun deleteNote(@Header("Authorization") token: String, @Path("id") id: Int)
 
-    //Request URL: https://api.notezz.com/notes/70342
-    //Request Method: PATCH
+
 
     @PATCH("/notes/{id}")
     suspend fun updateNote(@Header("Authorization") token: String, @Path("id") id:Int, @Body UpdateNoteRequest: updateNoteRequest):Note
 
+
+    @POST("/auth/send-login-link")
+    suspend fun forgotPassword(@Body email: UserEmail):Response<Unit>
+
+    @POST("/auth/update")
+    suspend fun updateAccount(@Header("Authorization") token: String, @Body accountDetails: AccountDetails )
 
 }

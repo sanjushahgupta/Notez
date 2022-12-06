@@ -8,6 +8,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -62,6 +64,11 @@ fun AddandEditScreen(
                 painter = painterResource(id = compose.notezz.R.drawable.logo),
                 contentDescription = "logo"
             )
+
+          Icon(Icons.Default.Settings, "",
+              modifier = Modifier.padding(start = 10.dp)
+                  .clickable { navController.navigate("updateAccount/$token") },
+              tint = Color.White)
         }
     }) {}
 
