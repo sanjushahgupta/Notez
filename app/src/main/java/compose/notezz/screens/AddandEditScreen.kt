@@ -19,7 +19,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.substring
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -28,6 +27,7 @@ import compose.notezz.model.Note
 import compose.notezz.model.NoteInfo
 import compose.notezz.model.updateNoteRequest
 import compose.notezz.util.Dimension
+
 
 @OptIn(ExperimentalComposeUiApi::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -68,32 +68,34 @@ fun AddandEditScreen(
     val focus = LocalFocusManager.current
     Box(modifier = Modifier.fillMaxWidth(), Alignment.Center) {
         Column(
-            modifier = Modifier.padding(top = 55.dp)
+            modifier = Modifier
+                .padding(top = 55.dp)
                 .clickable(MutableInteractionSource(),
-        indication = null,
-        onClick = { focus.clearFocus() }),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally)
-        {
+                    indication = null,
+                    onClick = { focus.clearFocus() }),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Card(
                 modifier = Modifier
-                   // .verticalScroll(ScrollState(1),true,)
+                    // .verticalScroll(ScrollState(1),true,)
                     .fillMaxWidth()
-                    .height(Dimension.height(value = 10f).dp)
-                    ,elevation = 20.dp
+                    .height(Dimension.height(value = 10f).dp), elevation = 20.dp
             ) {
-                OutlinedTextField(value = title.value,
-                    onValueChange = { title.value = it},
+                OutlinedTextField(
+                    value = title.value,
+                    onValueChange = { title.value = it },
                     modifier = Modifier.padding(5.dp),
                     placeholder = { Text("Note title") },
                     maxLines = 1,
-                colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black))
+                    colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
+                )
             }
 
             Spacer(modifier = Modifier.padding(top = 20.dp))
             Card(
                 modifier = Modifier
-                    .verticalScroll(ScrollState(1),true)
+                    .verticalScroll(ScrollState(1), true)
                     .fillMaxWidth()
                     .height(Dimension.height(value = 35f).dp),
                 elevation = 20.dp,
@@ -105,6 +107,8 @@ fun AddandEditScreen(
                     placeholder = { Text(text = "Note description") })
             }
             Spacer(modifier = Modifier.padding(top = 20.dp))
+
+
             if (noteId.equals("idis0")) {
 
                 Button(onClick = { addState.value = true }, modifier = Modifier.wrapContentSize()) {
@@ -120,8 +124,7 @@ fun AddandEditScreen(
                 title.value = titlee
                 body.value = bodyy
                 Button(
-                    onClick = { updateState.value = true },
-                    modifier = Modifier.wrapContentSize()
+                    onClick = { updateState.value = true }, modifier = Modifier.wrapContentSize()
                 ) {
                     Icon(
                         painter = painterResource(id = compose.notezz.R.drawable.ic_baseline_save_24),
@@ -131,32 +134,39 @@ fun AddandEditScreen(
                     Text("Update Note")
                 }
             }
+
         }
     }
 
 
     val noteInfo = NoteInfo(title.value, body.value, status = "active")
+
     if (addState.value == true) {
-        val context = LocalContext.current
-        val response = produceState<DataOrException<Note, Boolean, Exception>>(
-            initialValue = DataOrException(
-                loading = true
-            )
-        ) {
-            value = authViewModel.addNote("Bearer" + " " + token, noteInfo)
-        }.value
-
-        if (response.loading == true) {
-            CircularProgressIndicator()
-        } else if (response.data != null) {
-
-            navController.navigate("listofNotes/$token")
-            addState.value = false
+        if (noteInfo.title.isEmpty() && noteInfo.body.isEmpty()) {
+            Toast.makeText(
+                LocalContext.current,
+                "Title or description must be provided.",
+                Toast.LENGTH_LONG
+            ).show()
         } else {
-            Toast.makeText(context, response.e?.message.toString(), Toast.LENGTH_LONG).show()
+            val context = LocalContext.current
+            val response = produceState<DataOrException<Note, Boolean, Exception>>(
+                initialValue = DataOrException(
+                    loading = true
+                )
+            ) {
+                value = authViewModel.addNote("Bearer" + " " + token, noteInfo)
+            }.value
+            if (response.loading == true) {
+                CircularProgressIndicator()
+            } else if (response.data != null) {
+                navController.navigate("listofNotes/$token")
+                addState.value = false
+            } else {
+                Toast.makeText(context, response.e?.message.toString(), Toast.LENGTH_LONG).show()
+            }
         }
     }
-
     //update
 
 
@@ -183,8 +193,7 @@ fun AddandEditScreen(
 
             updateState.value = false
         } else {
-            Toast.makeText(context, "Something went wrong, Try again", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Title ", Toast.LENGTH_SHORT).show()
         }
     }
-
 }

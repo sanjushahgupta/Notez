@@ -12,6 +12,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import compose.notezz.R
 import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.Note
@@ -32,7 +35,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Scope
 
-@SuppressLint("SuspiciousIndentation", "UnusedMaterialScaffoldPaddingParameter")
+
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun HomeScreenListOfNotes(Token: String, navController: NavController) {
     val authViewModel: AuthenticationViewModel = hiltViewModel()
@@ -81,44 +85,44 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
     }) {}
 
 
-    Column {
-        if (notesResult.loading == true) {
-            CircularProgressIndicator()
+        Column {
+            if (notesResult.loading == true) {
+                CircularProgressIndicator()
 
-        } else if (notesResult.data != null) {
+            } else if (notesResult.data != null) {
 
-            if (notesResult.data!!.isEmpty()) {
+                if (notesResult.data!!.isEmpty()) {
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 80.dp, start = 15.dp)
-                ) {
-                    Text(text = "No notes", fontWeight = FontWeight.Bold)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 80.dp, start = 15.dp)
+                    ) {
+                        Text(text = "No notes", fontWeight = FontWeight.Bold)
+                    }
+
+                } else {
+
+                    ListItem(authViewModel, token, navController, notesResult.data!!)
                 }
 
-            } else {
-
-                ListItem(authViewModel, token, navController, notesResult.data!!)
             }
 
+            Scaffold(floatingActionButton = {
+                FloatingActionButton(
+                    onClick = {
+
+                        navController.navigate("addNotes/$token/title/body/idis0/status/created/updated/userId")
+                    },
+                    backgroundColor = Color.Cyan
+                ) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "To add Notes")
+                }
+            }) {}
         }
-
-        Scaffold(floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-
-                    navController.navigate("addNotes/$token/title/body/idis0/status/created/updated/userId")
-                },
-                backgroundColor = Color.Cyan
-            ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "To add Notes")
-            }
-        }) {}
     }
-}
 
 
-@OptIn(ExperimentalMaterialApi::class)
+
 @Composable
 fun ListItem(
     authenticationViewModel: AuthenticationViewModel,
@@ -135,6 +139,7 @@ fun ListItem(
             .background(Color.LightGray)
     ) {
         items(data) { item ->
+
             var mutablestatetodelete by remember { mutableStateOf(false) }
             Card(
                 modifier = Modifier
@@ -181,7 +186,7 @@ fun ListItem(
                             tint = Color.Red,
                         )
                         if (mutablestatetodelete) {
-                            Delete(authenticationViewModel, token, item.id)
+                            Delete(authenticationViewModel, token, item.id,navController)
                         }
 
                     }
@@ -200,14 +205,18 @@ fun ListItem(
     }
 }
 
-@SuppressLint(/* ...value = */ "ProduceStateDoesNotAssignValue")
+
 @Composable
 fun Delete(
     authenticationViewModel: AuthenticationViewModel,
     token: String,
-    id: Int
+    id: Int,
+    navController: NavController
 ) {
+
     var stateOfAlertBox by remember { mutableStateOf(true) }
+   var t = Toast.makeText(LocalContext.current,"Deleted sucessfully",Toast.LENGTH_SHORT)
+
     if(stateOfAlertBox) {
         AlertDialog(
             onDismissRequest = { stateOfAlertBox = false },
@@ -215,10 +224,14 @@ fun Delete(
                 TextButton(
                     onClick = {
                         authenticationViewModel.deleteNote(token, id)
-                        stateOfAlertBox = false
+                       // stateOfAlertBox = false
+                      //  t.show()
+                        navController.navigate("listofNotes/$token")
                               },
+
                 ) {
                     Text("Yes")
+
                 }
             },
             dismissButton = {

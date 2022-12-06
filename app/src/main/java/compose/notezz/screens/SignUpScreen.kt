@@ -1,6 +1,7 @@
 package compose.notezz.screens
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -11,7 +12,6 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -27,28 +27,30 @@ import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.ResponseofSignUpAndLogIn
 import compose.notezz.model.UserPreference
 import compose.notezz.model.UsernameandPassword
-import compose.notezz.navigation.navigationNavController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@SuppressLint("SuspiciousIndentation", "UnusedMaterialScaffoldPaddingParameter",
-    "CoroutineCreationDuringComposition")
+@SuppressLint(
+    "SuspiciousIndentation",
+    "UnusedMaterialScaffoldPaddingParameter",
+    "CoroutineCreationDuringComposition",
+    "WrongConstant"
+)
 
 @Composable
 fun SignUpScreen(navController: NavController) {
-    var authViewModel: AuthenticationViewModel = hiltViewModel()
-    val username = remember { mutableStateOf("ramniwash") }
-    val password = remember { mutableStateOf("2rxbjjbd") }
-    var signUpButtton = remember { mutableStateOf(false) }
+    val authViewModel: AuthenticationViewModel = hiltViewModel()
+    val username = remember { mutableStateOf("") }
+    val password = remember { mutableStateOf("") }
+    val confirmPassword = remember { mutableStateOf("") }
+    val signUpButtton = remember { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val dataStore = UserPreference(context)
 
     Scaffold(topBar = {
         TopAppBar(
-            modifier = Modifier
-                .fillMaxWidth(),
-            backgroundColor = Color.DarkGray
+            modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
         ) {
 
             Icon(
@@ -61,7 +63,7 @@ fun SignUpScreen(navController: NavController) {
         }
     }) {}
 
-var focus = LocalFocusManager.current
+    var focus = LocalFocusManager.current
     Column(
         modifier = Modifier
             .clickable(MutableInteractionSource(),
@@ -98,8 +100,7 @@ var focus = LocalFocusManager.current
         OutlinedTextField(
             value = username.value,
             onValueChange = { username.value = it },
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
 
         )
@@ -109,13 +110,11 @@ var focus = LocalFocusManager.current
             text = "Password",
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
             fontWeight = FontWeight.Bold,
-            //  color = Color(R.color.textColor)
         )
         OutlinedTextField(
             value = password.value,
             onValueChange = { password.value = it },
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = PasswordVisualTransformation(),
@@ -130,10 +129,10 @@ var focus = LocalFocusManager.current
             //  color = Color(R.color.textColor)
         )
         OutlinedTextField(
-            value = password.value,
-            onValueChange = { password.value = it },
-            modifier = Modifier
-                .fillMaxWidth()
+            value = confirmPassword.value,
+            onValueChange = { confirmPassword.value = it },
+            modifier = Modifier.fillMaxWidth(),
+            visualTransformation = PasswordVisualTransformation()
 
         )
 
@@ -148,13 +147,11 @@ var focus = LocalFocusManager.current
         Spacer(modifier = Modifier.padding(bottom = 12.dp))
 
         Button(
-            onClick = {signUpButtton.value = true},
-            colors = ButtonDefaults.buttonColors(
-                contentColor = Color.White, backgroundColor = Color(
-                    R.color.blue
-                )
-            )
-        ) {
+            onClick = { signUpButtton.value = true },
+
+            ) {
+
+
             Icon(
                 tint = Color.White,
                 painter = painterResource(id = R.drawable.ic_baseline_person_24),
@@ -164,9 +161,8 @@ var focus = LocalFocusManager.current
             Text(
                 text = "Register",
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
                 fontSize = 14.sp,
-                modifier = Modifier.padding(bottom = 5.dp, top = 5.dp)
+                color = Color.White
             )
         }
 
@@ -179,56 +175,88 @@ var focus = LocalFocusManager.current
         )
 
         Button(
-            onClick = { navController.navigate("login")},
-            colors = ButtonDefaults.buttonColors(Color(R.color.blue))
+            onClick = { navController.navigate("login") },
 
-        ) {
+            ) {
             Icon(
                 tint = Color.White,
                 painter = painterResource(id = R.drawable.ic_baseline_login_24),
                 contentDescription = "",
 
                 )
-            Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
+
             Text(
-                "Login",
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                color = Color.White
+                "Login", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.White
             )
         }
         Spacer(modifier = Modifier.padding(bottom = 8.dp))
     }
-    if(signUpButtton.value) {
-        val NotezzData =
-            produceState<DataOrException<ResponseofSignUpAndLogIn, Boolean, Exception>>(
-                initialValue = DataOrException(loading = true)
-            ) {
-                val usernameandPassword = UsernameandPassword(username.value, password.value)
-                value = authViewModel.signUp(usernameandPassword)
-            }.value
 
-        if (NotezzData.loading == true) {
 
-            CircularProgressIndicator()
+    if (signUpButtton.value) {
+        if (password.value.isEmpty() || confirmPassword.value.isEmpty() || username.value.isEmpty()) {
+            val toast =
+                Toast.makeText(LocalContext.current, "Please fill out fields.", Toast.LENGTH_SHORT)
+            toast.duration = 100
+            toast.show()
+            signUpButtton.value = false
+        } else if (username.value.length < 4) {
+            val toast = Toast.makeText(
+                context, "Length of a username must be of 4 characters or more.", Toast.LENGTH_SHORT
+            )
+            toast.duration = 100
+            toast.show()
+            signUpButtton.value = false
+        } else if (password.value.length < 6) {
+            val toast = Toast.makeText(
+                context, "Length of a password must be of 6 characters or more.", Toast.LENGTH_SHORT
+            )
+            toast.duration = 100
+            toast.show()
+            signUpButtton.value = false
 
-        } else if (NotezzData.data != null) {
-
-            var Token = NotezzData.data!!.token
-
-            scope.launch {
-                dataStore.saveLoginStatus(Token)
-            }
-
-            LaunchedEffect(Unit) {
-                delay(200)
-                navController.navigate("listofNotes/$Token")
-            }
+        } else if (!password.value.equals(confirmPassword.value)) {
+            val toast = Toast.makeText(
+                context, "Passwords do not match.", Toast.LENGTH_SHORT
+            )
+            toast.duration = 100
+            toast.show()
+            signUpButtton.value = false
 
         } else {
+            val NotezzData =
+                produceState<DataOrException<ResponseofSignUpAndLogIn, Boolean, Exception>>(
+                    initialValue = DataOrException(loading = true)
+                ) {
+                    val usernameandPassword = UsernameandPassword(username.value, password.value)
+                    value = authViewModel.signUp(usernameandPassword)
+                }.value
 
-            Text(text = NotezzData.e?.message.toString())
+            if (NotezzData.loading == true) {
+
+                CircularProgressIndicator()
+
+            } else if (NotezzData.data != null) {
+
+                var Token = NotezzData.data!!.token
+
+                scope.launch {
+                    dataStore.saveLoginStatus(Token)
+                }
+
+                LaunchedEffect(Unit) {
+                    delay(200)
+                    navController.navigate("listofNotes/$Token")
+                }
+
+            } else {
+                // Text(text = NotezzData.e?.message.toString())
+                val toast = Toast.makeText(context, "Username already exists", Toast.LENGTH_SHORT)
+                toast.duration = 100
+                toast.show()
+                signUpButtton.value = false
+
+            }
         }
     }
-
 }

@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import compose.notezz.screens.*
+import kotlin.system.exitProcess
 
 @Composable
 
@@ -23,14 +24,14 @@ fun navigationNavController() {
         composable("signUp") {
             SignUpScreen(navController = navController)
             BackHandler() {
-                //
+                exitProcess(1)
             }
         }
 
         composable("logIn") {
             LogInScreen(navController = navController)
             BackHandler() {
-                //
+                exitProcess(1)
             }
         }
 
@@ -56,6 +57,11 @@ fun navigationNavController() {
                 it.arguments?.getString("userId")!!.toString(),
                 navController = navController
             )
+        }
+
+        composable("forgotpassword/{email}"){
+            ForgotPassword( it.arguments?.getString("email").toString(),
+                navController = navController)
         }
 
 

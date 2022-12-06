@@ -1,6 +1,7 @@
 package compose.notezz.screens
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -18,7 +19,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -28,11 +28,16 @@ import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.ResponseofSignUpAndLogIn
 import compose.notezz.model.UserPreference
 import compose.notezz.model.UsernameandPassword
+import compose.notezz.navigation.navigationNavController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@SuppressLint("SuspiciousIndentation", "UnusedMaterialScaffoldPaddingParameter",
-    "CoroutineCreationDuringComposition"
+
+@SuppressLint(
+    "SuspiciousIndentation",
+    "UnusedMaterialScaffoldPaddingParameter",
+    "CoroutineCreationDuringComposition",
+    "WrongConstant"
 )
 @Composable
 fun LogInScreen(navController: NavController) {
@@ -47,9 +52,7 @@ fun LogInScreen(navController: NavController) {
     var loginStatus by remember { mutableStateOf("") }
     Scaffold(topBar = {
         TopAppBar(
-            modifier = Modifier
-                .fillMaxWidth(),
-            backgroundColor = Color.DarkGray
+            modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
         ) {
 
             Icon(
@@ -61,7 +64,7 @@ fun LogInScreen(navController: NavController) {
             Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
         }
     }) {}
-       var focus = LocalFocusManager.current
+    var focus = LocalFocusManager.current
     Column(
         modifier = Modifier
             .clickable(MutableInteractionSource(),
@@ -70,7 +73,7 @@ fun LogInScreen(navController: NavController) {
             .fillMaxWidth()
             .fillMaxWidth()
             .padding(start = 10.dp, end = 10.dp),
-             verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center
     ) {
 
         Text(
@@ -97,8 +100,7 @@ fun LogInScreen(navController: NavController) {
         OutlinedTextField(
             value = username.value,
             onValueChange = { username.value = it },
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
 
 
@@ -115,8 +117,7 @@ fun LogInScreen(navController: NavController) {
         OutlinedTextField(
             value = password.value,
             onValueChange = { password.value = it },
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = PasswordVisualTransformation()
@@ -147,7 +148,8 @@ fun LogInScreen(navController: NavController) {
         Text(
             "Forgot Password?",
             fontWeight = FontWeight.Bold,
-            color = colorResource(id = R.color.blue)
+            color = colorResource(id = R.color.blue),
+            modifier = Modifier.clickable { navController.navigate("forgotpassword/email") }
         )
 
 
@@ -163,7 +165,7 @@ fun LogInScreen(navController: NavController) {
         )
 
         Button(
-            onClick = {navController.navigate("signUp")},
+            onClick = { navController.navigate("signUp") },
             //  colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue)
         ) {
             Icon(
@@ -174,17 +176,15 @@ fun LogInScreen(navController: NavController) {
                 )
             Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
             Text(
-                "Register",
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                color = Color.White
+                "Register", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.White
             )
         }
 
 
         if (stateOfLoginButton.value == true) {
+
             val usernameandPassword = UsernameandPassword(username.value, password.value)
-            var logInResponseData =
+            val logInResponseData =
                 produceState<DataOrException<ResponseofSignUpAndLogIn, Boolean, Exception>>(
                     initialValue = DataOrException(
                         loading = true
@@ -198,7 +198,7 @@ fun LogInScreen(navController: NavController) {
 
             } else if (logInResponseData.data != null) {
 
-                var Token = logInResponseData.data!!.token
+                val Token = logInResponseData.data!!.token
 
                 scope.launch {
                     dataStore.saveLoginStatus(Token)
@@ -210,11 +210,17 @@ fun LogInScreen(navController: NavController) {
                 }
 
             } else {
-                Text(text = "Exception:" + logInResponseData.data)
+                // Text(text = "Exception:" + logInResponseData.data)
+                val toast =
+                    Toast.makeText(LocalContext.current, "Invalid credentials", Toast.LENGTH_SHORT)
+                toast.duration = 100
+                toast.show()
+                stateOfLoginButton.value = false
 
             }
 
         }
     }
+
 
 }
