@@ -62,10 +62,10 @@ class AuthenticationViewModel @Inject constructor(val notezzRepo: NotezzRepo) : 
 
     }
 
-    fun updateAccount(token: String, accountDetails: AccountDetails){
-        viewModelScope.launch {
-            notezzRepo.updateAccount(token, accountDetails)
-        }
+    suspend fun updateAccount(token: String, accountDetails: AccountDetails):DataOrException<Response<Unit>, Boolean, Exception>{
+
+           return notezzRepo.updateAccount(token, accountDetails)
+
 
     }
 

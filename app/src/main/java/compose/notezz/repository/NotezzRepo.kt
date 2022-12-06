@@ -87,8 +87,15 @@ class NotezzRepo @Inject constructor(val api: NotezzApi) {
 
     }
 
-suspend fun updateAccount(token: String, accountDetails: AccountDetails){
-    api.updateAccount(token, accountDetails)
+suspend fun updateAccount(token: String, accountDetails: AccountDetails): DataOrException<Response<Unit>, Boolean, Exception>{
+
+    val response = try{
+        api.updateAccount(token, accountDetails)
+    }catch (e: Exception){
+        return DataOrException(e = e)
+    }
+    return DataOrException(response)
+
 }
 
 }

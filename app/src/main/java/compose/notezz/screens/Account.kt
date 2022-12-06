@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,8 +25,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import compose.notezz.R
+import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.AccountDetails
+import compose.notezz.model.UserEmail
 import compose.notezz.model.UserPreference
+import retrofit2.Response
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "WrongConstant")
 @Composable
@@ -171,20 +175,39 @@ fun Account(token: String, navController: NavController) {
 
         if (UpdateAccountStatus.value == true) {
             if (username.value.isEmpty() || email.value.isEmpty() || username.value.length < 4) {
-
-
-                Toast.makeText(
-                    LocalContext.current,
-                    "Please fill username and email field. Length of username must be more than 3 characters.",
-                    Toast.LENGTH_LONG
-                ).show()
-
+                val toast = Toast.makeText(LocalContext.current,"\"Please fill email and username field.Length of username must be more than 3 characters.",Toast.LENGTH_SHORT)
+                toast.duration = 100
+                toast.show()
+                UpdateAccountStatus.value = false
             } else {
-                authViewModel.updateAccount(
-                    "Bearer" + " " + token, AccountDetails(username.value, email.value)
-                )
-                Toast.makeText(LocalContext.current, "Updated", Toast.LENGTH_LONG).show()
-               // navController.navigate("listofNotes/$token")
+                val updateResponseData = produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
+                    initialValue = DataOrException(
+                        loading = true
+                    )
+                ) {
+                    value =  authViewModel.updateAccount(
+                        "Bearer" + " " + token, AccountDetails(username.value, email.value)
+                    )
+                }.value
+
+                if(updateResponseData.loading == true){
+                    CircularProgressIndicator()
+                } else if(updateResponseData.data!!.code() == 201){
+
+                    val toast = Toast.makeText(LocalContext.current,"Updated Sucessfully.",Toast.LENGTH_SHORT)
+                    toast.duration = 100
+                    toast.show()
+                    UpdateAccountStatus.value = false
+                    navController.navigate("listofNotes/$token")
+                }else{
+                    val toast = Toast.makeText(LocalContext.current,"Something went wrong.",Toast.LENGTH_SHORT)
+                    toast.duration = 100
+                    toast.show()
+                    UpdateAccountStatus.value = false
+                }
+
+
+
             }
         }
 
