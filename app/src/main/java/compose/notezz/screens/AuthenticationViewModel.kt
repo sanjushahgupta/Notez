@@ -9,6 +9,7 @@ import compose.notezz.model.*
 import compose.notezz.repository.NotezzRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import retrofit2.Response
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,10 +41,10 @@ class AuthenticationViewModel @Inject constructor(val notezzRepo: NotezzRepo) : 
         return notezzRepo.addNote(token, noteInfo)
     }
 
-    fun deleteNote(token: String, id: Int) {
-        viewModelScope.launch {
-            notezzRepo.deleteNote("Bearer" + " " + token, id)
-        }
+   suspend fun deleteNote(token: String, id: Int): DataOrException<Response<Unit>, Boolean, Exception> {
+
+        return notezzRepo.deleteNote("Bearer" + " " + token, id)
+
     }
 
    suspend fun updateNote(token: String, id: Int, updateNoteRequest: updateNoteRequest): DataOrException<Note, Boolean, Exception>{
@@ -53,7 +54,7 @@ class AuthenticationViewModel @Inject constructor(val notezzRepo: NotezzRepo) : 
         return notezzRepo.signUp(usernameandPassword)
     }
 
-    suspend fun forgotPassword(userEmail:UserEmail):DataOrException<Any, Boolean, Exception>{
+    suspend fun forgotPassword(userEmail:UserEmail):DataOrException<Response<Unit>, Boolean, Exception>{
 
 
             return notezzRepo.forgotPassword(userEmail)

@@ -24,7 +24,7 @@ interface NotezzApi {
 
 
     @DELETE("/notes/{id}")
-    suspend fun deleteNote(@Header("Authorization") token: String, @Path("id") id: Int)
+    suspend fun deleteNote(@Header("Authorization") token: String, @Path("id") id: Int):Response<Unit>
 
 
 

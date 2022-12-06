@@ -12,7 +12,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,16 +23,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import compose.notezz.R
 import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.Note
 import compose.notezz.model.UserPreference
 import compose.notezz.util.Dimension
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Scope
+import retrofit2.Response
 
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -46,6 +42,7 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
     val dataStore = UserPreference(context)
     var loginStatus by remember { mutableStateOf("") }
 
+
     val notesResult = produceState<DataOrException<ArrayList<Note>, Boolean, Exception>>(
         initialValue = DataOrException(loading = true)
     ) {
@@ -53,9 +50,7 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
     }.value
     Scaffold(topBar = {
         TopAppBar(
-            modifier = Modifier
-                .fillMaxWidth(),
-            backgroundColor = Color.DarkGray
+            modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
 
         ) {
 
@@ -85,42 +80,40 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
     }) {}
 
 
-        Column {
-            if (notesResult.loading == true) {
-                CircularProgressIndicator()
+    Column {
+        if (notesResult.loading == true) {
+            CircularProgressIndicator()
 
-            } else if (notesResult.data != null) {
+        } else if (notesResult.data != null) {
 
-                if (notesResult.data!!.isEmpty()) {
+            if (notesResult.data!!.isEmpty()) {
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(top = 80.dp, start = 15.dp)
-                    ) {
-                        Text(text = "No notes", fontWeight = FontWeight.Bold)
-                    }
-
-                } else {
-
-                    ListItem(authViewModel, token, navController, notesResult.data!!)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(top = 80.dp, start = 15.dp)
+                ) {
+                    Text(text = "No notes", fontWeight = FontWeight.Bold)
                 }
 
+            } else {
+
+                ListItem(authViewModel, token, navController, notesResult.data!!)
             }
 
-            Scaffold(floatingActionButton = {
-                FloatingActionButton(
-                    onClick = {
-
-                        navController.navigate("addNotes/$token/title/body/idis0/status/created/updated/userId")
-                    },
-                    backgroundColor = Color.Cyan
-                ) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "To add Notes")
-                }
-            }) {}
         }
-    }
 
+        Scaffold(floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+
+                    navController.navigate("addNotes/$token/title/body/idis0/status/created/updated/userId")
+                }, backgroundColor = Color.Cyan
+            ) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "To add Notes")
+            }
+        }) {}
+    }
+}
 
 
 @Composable
@@ -145,14 +138,15 @@ fun ListItem(
                 modifier = Modifier
                     .width(Dimension.width(value = 100f).dp)
                     .height(Dimension.height(value = 12f).dp)
-                    .padding(10.dp), shape = RoundedCornerShape(20), elevation = 20.dp
+                    .padding(10.dp),
+                shape = RoundedCornerShape(20),
+                elevation = 20.dp
             ) {
 
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable(
-                            true,
+                        .clickable(true,
                             null,
                             null,
                             onClick = { navController.navigate("addNotes/$token/${item.title}/${item.body}/${item.id}/${item.status}/${item.created}/${item.created}/${item.userId}") })
@@ -186,7 +180,7 @@ fun ListItem(
                             tint = Color.Red,
                         )
                         if (mutablestatetodelete) {
-                            Delete(authenticationViewModel, token, item.id,navController)
+                            Delete(authenticationViewModel, token, item.id, navController)
                         }
 
                     }
@@ -206,6 +200,7 @@ fun ListItem(
 }
 
 
+@SuppressLint("WrongConstant")
 @Composable
 fun Delete(
     authenticationViewModel: AuthenticationViewModel,
@@ -215,21 +210,21 @@ fun Delete(
 ) {
 
     var stateOfAlertBox by remember { mutableStateOf(true) }
-   var t = Toast.makeText(LocalContext.current,"Deleted sucessfully",Toast.LENGTH_SHORT)
+    var deleteResponse by remember { mutableStateOf(false) }
+    var t = Toast.makeText(LocalContext.current, "Deleted sucessfully", Toast.LENGTH_SHORT)
 
-    if(stateOfAlertBox) {
+    if (stateOfAlertBox) {
+
         AlertDialog(
             onDismissRequest = { stateOfAlertBox = false },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        authenticationViewModel.deleteNote(token, id)
-                       // stateOfAlertBox = false
-                      //  t.show()
-                        navController.navigate("listofNotes/$token")
-                              },
 
-                ) {
+                        deleteResponse = true
+                    },
+
+                    ) {
                     Text("Yes")
 
                 }
@@ -243,5 +238,29 @@ fun Delete(
         )
 
     }
+
+    if (deleteResponse == true) {
+        val deleteResponseData = produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
+            initialValue = DataOrException(loading = true)
+        ) {
+            value = authenticationViewModel.deleteNote(token, id)
+        }.value
+
+        if (deleteResponseData.loading == true) {
+            CircularProgressIndicator()
+        } else if (deleteResponseData.data!!.code() == 200) {
+            navController.navigate("listofNotes/$token")
+            deleteResponse = false
+
+        } else {
+
+            val toast =
+                Toast.makeText(LocalContext.current, "Something went wrong", Toast.LENGTH_LONG)
+            toast.duration = 100
+            toast.show()
+            deleteResponse = false
+        }
+    }
+
 
 }
