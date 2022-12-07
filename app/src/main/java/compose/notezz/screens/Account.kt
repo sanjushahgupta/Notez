@@ -96,6 +96,7 @@ fun Account(token: String, navController: NavController) {
             fontWeight = FontWeight.Bold,
 
             )
+
         OutlinedTextField(
             value = email.value,
             onValueChange = { email.value = it },
@@ -197,7 +198,6 @@ fun Account(token: String, navController: NavController) {
                 if(updateResponseData.loading == true){
                     CircularProgressIndicator()
                 } else if(updateResponseData.data!!.code() == 201){
-
                     val toast = Toast.makeText(LocalContext.current,"Account updated.",Toast.LENGTH_SHORT)
                     toast.duration = 100
                     toast.show()
@@ -262,9 +262,9 @@ fun Account(token: String, navController: NavController) {
                 )
 
             }
-            if (deleteAlertBox.value == true){
-            val responseData =
-                produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
+            if (deleteAlertBox.value == true)
+            {
+            val responseData = produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
                     initialValue = DataOrException(
                         loading = true
                     )

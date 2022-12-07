@@ -44,6 +44,8 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
     val scope = rememberCoroutineScope()
     val dataStore = UserPreference(context)
 
+
+
     val notesResult = produceState<DataOrException<Response<ArrayList<Note>>, Boolean, Exception>>(
         initialValue = DataOrException(loading = true)
     ) {
@@ -98,45 +100,47 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
 
         }) {}
 
-         Column {
-          var title = " "
-          var body = " "
-          if (notesResult.loading == true) {
-              CircularProgressIndicator()
+        Column {
+            var title = " "
+            var body = " "
+            if (notesResult.loading == true) {
+                CircularProgressIndicator()
 
-          } else if (notesResult.data!!.code() == 200) {
+            } else if (notesResult.data!!.code() == 200) {
 
-              if (notesResult.data!!.body()!!.isEmpty()) {
+                if (notesResult.data!!.body()!!.isEmpty()) {
 
-                  Row(
-                      verticalAlignment = Alignment.CenterVertically,
-                      modifier = Modifier.padding(top = 80.dp, start = 15.dp)
-                  ) {
-                      Text(text = "No notes", fontWeight = FontWeight.Bold)
-                  }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 80.dp, start = 15.dp)
+                    ) {
+                        Text(text = "No notes", fontWeight = FontWeight.Bold)
+                    }
 
-              } else if (!notesResult.data!!.body()!!.isEmpty()) {
+                } else if (!notesResult.data!!.body()!!.isEmpty()) {
 
-                 ListItem(authViewModel, token, navController, notesResult!!.data!!.body()!!)
-              }
+                    ListItem(authViewModel, token, navController, notesResult.data!!.body()!!)
+                }
 
-          }
+            }
 
-          Scaffold(floatingActionButton = {
+            Scaffold(floatingActionButton = {
 
-              FloatingActionButton(
-                  onClick = {
+                FloatingActionButton(
+                    onClick = {
 
-                      navController.navigate("addNotes/$token/${title}/${body}/idis0/status/created/updated/userId")
-                  }, backgroundColor = Color.Cyan
-              ) {
-                  Icon(imageVector = Icons.Default.Add, contentDescription = "To add Notes")
-              }
-          }) {}
-      }
+                        navController.navigate("addNotes/$token/${title}/${body}/idis0/status/created/updated/userId")
+                    }, backgroundColor = Color.Cyan
+                ) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "To add Notes")
+                }
+            }) {}
+        }
 
     }
 }
+
+@SuppressLint("UnrememberedMutableState", "WrongConstant")
 @Composable
 fun ListItem(
     authenticationViewModel: AuthenticationViewModel,
@@ -155,6 +159,8 @@ fun ListItem(
         items(data) { item ->
 
             var mutablestatetodelete = remember { mutableStateOf(false) }
+            var stateOfAlertBox = remember{mutableStateOf(false)}
+
             Card(
                 modifier = Modifier
                     .width(Dimension.width(value = 100f).dp)
@@ -195,14 +201,57 @@ fun ListItem(
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Delete",
                             modifier = Modifier
-                                .clickable { mutablestatetodelete.value = true }
+                                .clickable { stateOfAlertBox.value = true }
                                 .padding(end = 6.dp)
                                 .wrapContentSize(),
                             tint = Color.Red,
                         )
-                        if (mutablestatetodelete.value == true) {
-                              Delete(authenticationViewModel, token, item.id, navController)
+                        if (stateOfAlertBox.value == true) {
+                            AlertDialog(
+                                onDismissRequest = { stateOfAlertBox.value = false },
+                                confirmButton = {
+                                    TextButton(
+                                        onClick = {
 
+                                            mutablestatetodelete.value = true
+                                            stateOfAlertBox.value = false
+                                        },
+
+                                        ) {
+                                        Text("Yes")
+
+                                    }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { stateOfAlertBox.value = false }) {
+                                        Text("No")
+                                    }
+                                },
+                                title = { Text("Are you sure you want to delete this item?") },
+                            )
+                        }
+
+                        if (mutablestatetodelete.value) {
+                            val deleteResponseData = produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
+                                initialValue = DataOrException(loading = true)
+                            ) {
+                                value = authenticationViewModel.deleteNote(token, item.id)
+                            }.value
+
+                            if (deleteResponseData.loading == true) {
+                                CircularProgressIndicator()
+                            } else if (deleteResponseData.data!!.code() == 200) {
+                                navController.navigate("listofNotes/$token")
+                                mutablestatetodelete.value = false
+
+                            } else {
+                                val toast = Toast.makeText(LocalContext.current, "Something went wrong", Toast.LENGTH_LONG)
+                                toast.duration = 100
+                                toast.show()
+                                navController.navigate("listofNotes/$token")
+                                mutablestatetodelete.value = false
+
+                            }
                         }
 
                     }
@@ -219,68 +268,4 @@ fun ListItem(
 
         }
     }
-}
-
-
-@SuppressLint("WrongConstant")
-@Composable
-fun Delete(
-    authenticationViewModel: AuthenticationViewModel,
-    token: String,
-    id: Int,
-    navController: NavController
-) {
-
-    val stateOfAlertBox = remember { mutableStateOf(true) }
-    val deleteResponse = remember { mutableStateOf(false) }
-
-
-    if (stateOfAlertBox.value == true) {
-
-        AlertDialog(
-            onDismissRequest = { stateOfAlertBox.value = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-
-                        deleteResponse.value = true
-                    },
-
-                    ) {
-                    Text("Yes")
-
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { stateOfAlertBox.value = false }) {
-                    Text("No")
-                }
-            },
-            title = { Text("Are you sure you want to delete this item?") },
-        )
-
-    }
-
-    if (deleteResponse.value == true) {
-        val deleteResponseData = produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
-            initialValue = DataOrException(loading = true)
-        ) {
-            value = authenticationViewModel.deleteNote(token, id)
-        }.value
-
-        if (deleteResponseData.loading == true) {
-            CircularProgressIndicator()
-        } else if (deleteResponseData.data!!.code() == 200) {
-            navController.navigate("listofNotes/$token")
-            deleteResponse.value = false
-        } else {
-            val toast =
-                Toast.makeText(LocalContext.current, "Something went wrong", Toast.LENGTH_LONG)
-            toast.duration = 100
-            toast.show()
-            deleteResponse.value = false
-        }
-    }
-
-
 }

@@ -46,16 +46,10 @@ fun WelcomeScreen(navController: NavController) {
             val token = it.toString()
             async {
                 delay(2000)
-                Log.d("tokenFound", "Fetched in welcome screen token: " + token)
-
                 if (token.equals("loggedOut")) {
-                    Log.d("tokenFound", "Redirecting to login: loggedOut")
                     navController.navigate("logIn")
                 }else{
-                    Log.d("tokenFound", "Sending to listOfNotes with: $token")
                     navController.navigate("listofNotes/$token")
-                   // navController.navigate("logIn")
-
                 }
             }.await()
 
