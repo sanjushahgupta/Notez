@@ -8,26 +8,26 @@ import retrofit2.http.*
 
 interface NotezzApi {
     @GET("/notes")
-    suspend fun getListOfNotes(@Header("Authorization") token: String): ArrayList<Note>
+    suspend fun getListOfNotes(@Header("Authorization") token: String): Response<ArrayList<Note>>
 
 
     // {title: "hello", body: "<p>mann</p>", status: "ACTIVE"}
     @POST("/notes")
-    suspend fun addNotes(@Header("Authorization") token: String, @Body noteInfo: NoteInfo): Note
+    suspend fun addNotes(@Header("Authorization") token: String, @Body noteInfo: NoteInfo): Response<Note>
 
 
     @DELETE("/notes/{id}")
     suspend fun deleteNote(@Header("Authorization") token: String, @Path("id") id: Int):Response<Unit>
 
     @PATCH("/notes/{id}")
-    suspend fun updateNote(@Header("Authorization") token: String, @Path("id") id:Int, @Body UpdateNoteRequest: updateNoteRequest):Note
+    suspend fun updateNote(@Header("Authorization") token: String, @Path("id") id:Int, @Body UpdateNoteRequest: updateNoteRequest):Response<Note>
 //Authorization
 
     @POST("/auth/signup")
-    suspend fun signUp(@Body register: UsernameandPassword): ResponseofSignUpAndLogIn
+    suspend fun signUp(@Body register: UsernameandPassword): Response<ResponseofSignUpAndLogIn>
 
     @POST("/auth/signin")
-    suspend fun LogIn(@Body usernameandPassword: UsernameandPassword): ResponseofSignUpAndLogIn
+    suspend fun LogIn(@Body usernameandPassword: UsernameandPassword): Response<ResponseofSignUpAndLogIn>
 
     @POST("/auth/send-login-link")
     suspend fun forgotPassword(@Body email: UserEmail):Response<Unit>

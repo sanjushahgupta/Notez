@@ -10,10 +10,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -29,10 +26,11 @@ import compose.notezz.model.Note
 import compose.notezz.model.NoteInfo
 import compose.notezz.model.updateNoteRequest
 import compose.notezz.util.Dimension
+import retrofit2.Response
 
 
 @OptIn(ExperimentalComposeUiApi::class)
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "WrongConstant", "SuspiciousIndentation")
 @Composable
 fun AddandEditScreen(
     token: String,
@@ -47,8 +45,8 @@ fun AddandEditScreen(
 ) {
 
     val authViewModel: AuthenticationViewModel = hiltViewModel()
-    var title = remember { mutableStateOf("") }
-    val body = remember { mutableStateOf("") }
+    var title by remember { mutableStateOf(titlee) }
+    var body by remember { mutableStateOf(bodyy) }
     val addState = remember { mutableStateOf(false) }
     val updateState = remember { mutableStateOf(false) }
 
@@ -65,10 +63,14 @@ fun AddandEditScreen(
                 contentDescription = "logo"
             )
 
-          Icon(Icons.Default.Settings, "",
-              modifier = Modifier.padding(start = 10.dp)
-                  .clickable { navController.navigate("updateAccount/$token") },
-              tint = Color.White)
+            Icon(
+                Icons.Default.Settings,
+                "",
+                modifier = Modifier
+                    .padding(start = 10.dp)
+                    .clickable { navController.navigate("updateAccount/$token") },
+                tint = Color.White
+            )
         }
     }) {}
 
@@ -89,12 +91,11 @@ fun AddandEditScreen(
                     .fillMaxWidth()
                     .height(Dimension.height(value = 10f).dp), elevation = 20.dp
             ) {
-                OutlinedTextField(
-                    value = title.value,
-                    onValueChange = { title.value = it },
+                TextField(
+                    value = title,
+                    onValueChange = { title = it },
                     modifier = Modifier.padding(5.dp),
-                    placeholder = { Text("Note title") },
-                    maxLines = 1,
+                    label = { Text("Title") },
                     colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
                 )
             }
@@ -107,11 +108,11 @@ fun AddandEditScreen(
                     .height(Dimension.height(value = 35f).dp),
                 elevation = 20.dp,
             ) {
-                OutlinedTextField(value = body.value,
-                    onValueChange = { body.value = it },
+                TextField(value = body,
+                    onValueChange = { body = it },
                     colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black),
                     modifier = Modifier.padding(5.dp),
-                    placeholder = { Text(text = "Note description") })
+                    label = { Text(text = "Description") })
             }
             Spacer(modifier = Modifier.padding(top = 20.dp))
 
@@ -128,8 +129,6 @@ fun AddandEditScreen(
                 }
 
             } else if (!noteId.equals("idis0")) {
-                title.value = titlee
-                body.value = bodyy
                 Button(
                     onClick = { updateState.value = true }, modifier = Modifier.wrapContentSize()
                 ) {
@@ -143,64 +142,91 @@ fun AddandEditScreen(
             }
 
         }
-    }
 
 
-    val noteInfo = NoteInfo(title.value, body.value, status = "active")
+        val noteInfo = NoteInfo(title, body, status = "active")
 
-    if (addState.value == true) {
-        if (noteInfo.title.isEmpty() && noteInfo.body.isEmpty()) {
-            Toast.makeText(
-                LocalContext.current,
-                "Title or description must be provided.",
-                Toast.LENGTH_LONG
-            ).show()
-        } else {
+        if (addState.value == true) {
+            if (noteInfo.title.isEmpty() && noteInfo.body.isEmpty() || noteInfo.title.equals(" ") && noteInfo.body.equals(
+                    " "
+                )
+            ) {
+                val toast = Toast.makeText(
+                    LocalContext.current,
+                    "Title or description must be provided.",
+                    Toast.LENGTH_LONG
+                )
+                toast.duration = 100
+                toast.show()
+                addState.value = false
+            } else {
+                val context = LocalContext.current
+                val response = produceState<DataOrException<Response<Note>, Boolean, Exception>>(
+                    initialValue = DataOrException(
+                        loading = true
+                    )
+                ) {
+                    value = authViewModel.addNote("Bearer" + " " + token, noteInfo)
+                }.value
+                if (response.loading == true) {
+                    CircularProgressIndicator()
+                } else if (response.data?.code() == 201) {
+                    navController.navigate("listofNotes/$token")
+                    addState.value = false
+                } else {
+                    val toast =
+                        Toast.makeText(context, response.e?.message.toString(), Toast.LENGTH_LONG)
+                    toast.duration = 100
+                    toast.show()
+                    addState.value = false
+                }
+            }
+        }
+        //update
+
+
+        if (updateState.value == true) {
             val context = LocalContext.current
-            val response = produceState<DataOrException<Note, Boolean, Exception>>(
+            val note_id = noteId.toInt()
+            val user_id = userId.toInt()
+            val updateNote =
+                updateNoteRequest(title, body, status, note_id, user_id, created, updated)
+
+            if (updateNote.title.equals(" ") && updateNote.body.equals(" ") || updateNote.title.isEmpty() && updateNote.body.isEmpty()) {
+
+                val toast = Toast.makeText(
+                    LocalContext.current,
+                    "Title or description must be provided.",
+                    Toast.LENGTH_LONG
+                )
+                toast.duration = 100
+                toast.show()
+                updateState.value = false
+            }
+
+            val response = produceState<DataOrException<Response<Note>, Boolean, Exception>>(
                 initialValue = DataOrException(
                     loading = true
                 )
             ) {
-                value = authViewModel.addNote("Bearer" + " " + token, noteInfo)
+                value = authViewModel.updateNote("Bearer" + " " + token, note_id, updateNote)
             }.value
+
             if (response.loading == true) {
                 CircularProgressIndicator()
-            } else if (response.data != null) {
+
+            } else if (response.data!!.code() == 200) {
                 navController.navigate("listofNotes/$token")
-                addState.value = false
+                updateState.value = false
+
             } else {
-                Toast.makeText(context, response.e?.message.toString(), Toast.LENGTH_LONG).show()
+                val toast =
+                    Toast.makeText(context, response.e!!.message.toString(), Toast.LENGTH_SHORT)
+                toast.duration = 100
+                toast.show()
+                updateState.value = false
             }
         }
-    }
-    //update
 
-
-    if (updateState.value == true) {
-        val context = LocalContext.current
-        val note_id = noteId.toInt()
-        val user_id = userId.toInt()
-        val updateNote =
-            updateNoteRequest(title.value, body.value, status, note_id, user_id, created, updated)
-
-        val response = produceState<DataOrException<Note, Boolean, Exception>>(
-            initialValue = DataOrException(
-                loading = true
-            )
-        ) {
-            value = authViewModel.updateNote("Bearer" + " " + token, note_id, updateNote)
-        }.value
-
-        if (response.loading == true) {
-            CircularProgressIndicator()
-
-        } else if (response.data != null) {
-            navController.navigate("listofNotes/$token")
-
-            updateState.value = false
-        } else {
-            Toast.makeText(context, "Title ", Toast.LENGTH_SHORT).show()
-        }
     }
 }

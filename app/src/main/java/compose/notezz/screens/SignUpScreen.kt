@@ -29,6 +29,7 @@ import compose.notezz.model.UserPreference
 import compose.notezz.model.UsernameandPassword
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import retrofit2.Response
 
 @SuppressLint(
     "SuspiciousIndentation",
@@ -225,7 +226,7 @@ fun SignUpScreen(navController: NavController) {
 
         } else {
             val NotezzData =
-                produceState<DataOrException<ResponseofSignUpAndLogIn, Boolean, Exception>>(
+                produceState<DataOrException<Response<ResponseofSignUpAndLogIn>, Boolean, Exception>>(
                     initialValue = DataOrException(loading = true)
                 ) {
                     val usernameandPassword = UsernameandPassword(username.value, password.value)
@@ -236,9 +237,9 @@ fun SignUpScreen(navController: NavController) {
 
                 CircularProgressIndicator()
 
-            } else if (NotezzData.data != null) {
+            } else if (NotezzData.data!!.code() == 201) {
 
-                var Token = NotezzData.data!!.token
+                var Token = NotezzData.data!!.body()!!.token
 
                 scope.launch {
                     dataStore.saveLoginStatus(Token)
@@ -250,7 +251,6 @@ fun SignUpScreen(navController: NavController) {
                 }
 
             } else {
-                // Text(text = NotezzData.e?.message.toString())
                 val toast = Toast.makeText(context, "Username already exists", Toast.LENGTH_SHORT)
                 toast.duration = 100
                 toast.show()

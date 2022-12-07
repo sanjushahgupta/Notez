@@ -40,22 +40,22 @@ fun WelcomeScreen(navController: NavController) {
     val scope = rememberCoroutineScope()
     val dataStore = UserPreference(context)
 
-        scope.launch {
-            dataStore.loginStatus.collect {
-               val token = it.toString()
-                async {
-                    delay(2000)
-                    if (token.equals("0")) {
+    scope.launch {
+        dataStore.loginStatus.collect {
+            val token = it.toString()
+            async {
+                delay(2000)
+                if (token.equals("0")) {
 
-                        navController.navigate("logIn")
-                    }else{
-                       // navController.navigate("listofNotes/$token")
-                        navController.navigate("logIn")
-                    }
-                }.await()
+                    navController.navigate("logIn")
+                }else{
+                    // navController.navigate("listofNotes/$token")
+                    navController.navigate("logIn")
+                }
+            }.await()
 
-            }
         }
+    }
 
     Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally){
         Image(painter = painterResource(id = compose.notezz.R.drawable.spalsh), contentDescription ="")
@@ -63,15 +63,15 @@ fun WelcomeScreen(navController: NavController) {
 
 
 
-  /*  val infiniteTransition = rememberInfiniteTransition()
-    val heartSize by infiniteTransition.animateFloat(
-        initialValue = 300.0f,
-        targetValue = 250.0f,
-        animationSpec = infiniteRepeatable(animation = tween(900, 900, FastOutLinearInEasing), repeatMode = RepeatMode.Reverse)
-    )
-    Image(painter = painterResource(id = compose.notezz.R.drawable.logo),
-        contentDescription = "logo",
-        modifier = Modifier.size(heartSize.dp)
-    )*/
+    /*  val infiniteTransition = rememberInfiniteTransition()
+      val heartSize by infiniteTransition.animateFloat(
+          initialValue = 300.0f,
+          targetValue = 250.0f,
+          animationSpec = infiniteRepeatable(animation = tween(900, 900, FastOutLinearInEasing), repeatMode = RepeatMode.Reverse)
+      )
+      Image(painter = painterResource(id = compose.notezz.R.drawable.logo),
+          contentDescription = "logo",
+          modifier = Modifier.size(heartSize.dp)
+      )*/
 
 }

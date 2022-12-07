@@ -31,6 +31,7 @@ import compose.notezz.model.UsernameandPassword
 import compose.notezz.navigation.navigationNavController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import retrofit2.Response
 
 
 @SuppressLint(
@@ -61,7 +62,7 @@ fun LogInScreen(navController: NavController) {
                 painter = painterResource(id = compose.notezz.R.drawable.logo),
                 contentDescription = "logo"
             )
-            Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
+           // Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
         }
     }) {}
     var focus = LocalFocusManager.current
@@ -185,7 +186,7 @@ fun LogInScreen(navController: NavController) {
 
             val usernameandPassword = UsernameandPassword(username.value, password.value)
             val logInResponseData =
-                produceState<DataOrException<ResponseofSignUpAndLogIn, Boolean, Exception>>(
+                produceState<DataOrException<Response<ResponseofSignUpAndLogIn>, Boolean, Exception>>(
                     initialValue = DataOrException(
                         loading = true
                     )
@@ -196,9 +197,9 @@ fun LogInScreen(navController: NavController) {
             if (logInResponseData.loading == true) {
                 CircularProgressIndicator()
 
-            } else if (logInResponseData.data != null) {
+            } else if (logInResponseData.data!!.code() == 201) {
 
-                val Token = logInResponseData.data!!.token
+                val Token = logInResponseData.data!!.body()!!.token
 
                 scope.launch {
                     dataStore.saveLoginStatus(Token)

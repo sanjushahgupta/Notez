@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 class NotezzRepo @Inject constructor(val api: NotezzApi) {
 
-    suspend fun logIn(usernameandPassword: UsernameandPassword): DataOrException<ResponseofSignUpAndLogIn, Boolean, Exception> {
+    suspend fun logIn(usernameandPassword: UsernameandPassword): DataOrException<Response<ResponseofSignUpAndLogIn>, Boolean, Exception> {
         val response = try {
             api.LogIn(usernameandPassword)
         } catch (e: Exception) {
@@ -21,7 +21,7 @@ class NotezzRepo @Inject constructor(val api: NotezzApi) {
         return DataOrException(data = response)
     }
 
-    suspend fun getNotes(token: String): DataOrException<ArrayList<Note>, Boolean, Exception> {
+    suspend fun getNotes(token: String): DataOrException<Response<ArrayList<Note>>, Boolean, Exception> {
         val response = try {
             api.getListOfNotes(token)
         } catch (e: Exception) {
@@ -30,7 +30,7 @@ class NotezzRepo @Inject constructor(val api: NotezzApi) {
         return DataOrException(response)
     }
 
-    suspend fun addNote(token: String, noteInfo: NoteInfo):DataOrException<Note, Boolean, Exception>{
+    suspend fun addNote(token: String, noteInfo: NoteInfo):DataOrException<Response<Note>, Boolean, Exception>{
         val response = try{
             api.addNotes(token, noteInfo)
 
@@ -54,7 +54,7 @@ class NotezzRepo @Inject constructor(val api: NotezzApi) {
 
     }
 
-    suspend fun updateNote(token: String, id:Int, updateNoteRequest: updateNoteRequest): DataOrException<Note, Boolean, Exception>{
+    suspend fun updateNote(token: String, id:Int, updateNoteRequest: updateNoteRequest): DataOrException<Response<Note>, Boolean, Exception>{
         val response = try{
         api.updateNote(token, id,updateNoteRequest)
 
@@ -66,7 +66,7 @@ class NotezzRepo @Inject constructor(val api: NotezzApi) {
 
     }
 
-    suspend fun signUp(usernameandPassword: UsernameandPassword): DataOrException<ResponseofSignUpAndLogIn, Boolean, Exception>{
+    suspend fun signUp(usernameandPassword: UsernameandPassword): DataOrException<Response<ResponseofSignUpAndLogIn>, Boolean, Exception>{
 
         val response = try{
             api.signUp(usernameandPassword)

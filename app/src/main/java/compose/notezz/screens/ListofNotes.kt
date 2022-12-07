@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -32,7 +33,7 @@ import kotlinx.coroutines.launch
 import retrofit2.Response
 
 
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
 @Composable
 fun HomeScreenListOfNotes(Token: String, navController: NavController) {
     val authViewModel: AuthenticationViewModel = hiltViewModel()
@@ -43,79 +44,95 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
     var loginStatus by remember { mutableStateOf("") }
 
 
-    val notesResult = produceState<DataOrException<ArrayList<Note>, Boolean, Exception>>(
+    val notesResult = produceState<DataOrException<Response<ArrayList<Note>>, Boolean, Exception>>(
         initialValue = DataOrException(loading = true)
     ) {
         value = authViewModel.getNotes("Bearer" + " " + token)
     }.value
-    Scaffold(topBar = {
-        TopAppBar(
-            modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
 
-        ) {
+    if (notesResult.loading == true) {
+        CircularProgressIndicator()
 
-
-            Icon(
-                modifier = Modifier.padding(start = 10.dp),
-                tint = Color.Cyan,
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "logo"
-            )
-            Spacer(Modifier.weight(1f))
-            Icon(tint = Color.White,
-                painter = painterResource(id = R.drawable.ic_baseline_logout_24),
-                contentDescription = "logout",
-                modifier = Modifier
-                    .padding(end = 10.dp)
-                    .clickable {
-                        token = "Tokenis0"
-                        navController.navigate("logIn")
-                        loginStatus = "0"
-                        scope.launch {
-                            dataStore.saveLoginStatus(loginStatus)
-                        }
-                    })
+    } else if (notesResult.data!!.code() == 401) {
+        token = "0"
+        navController.navigate("logIn")
+        loginStatus = "0"
+        scope.launch {
+            dataStore.saveLoginStatus("0")
         }
 
-    }) {}
+    } else {
+        Scaffold(topBar = {
+            TopAppBar(
+                modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
+
+            ) {
+                // Text("The text is "+token)
+
+                Icon(
+                    modifier = Modifier.padding(start = 10.dp),
+                    tint = Color.Cyan,
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "logo"
+                )
+                Spacer(Modifier.weight(1f))
+
+                Icon(tint = Color.White,
+                    painter = painterResource(id = R.drawable.ic_baseline_logout_24),
+                    contentDescription = "logout",
+                    modifier = Modifier
+                        .padding(end = 10.dp)
+                        .clickable {
+                            token = "0"
+                            navController.navigate("logIn")
+                            loginStatus = "0"
+                            scope.launch {
+                                dataStore.saveLoginStatus("0")
+                            }
+                        })
+            }
+
+        }) {}
 
 
-    Column {
-        if (notesResult.loading == true) {
-            CircularProgressIndicator()
+        Column {
+            var title = " "
+            var body = " "
+            if (notesResult.loading == true) {
+                CircularProgressIndicator()
 
-        } else if (notesResult.data != null) {
+            } else if (notesResult.data!!.code() == 200) {
 
-            if (notesResult.data!!.isEmpty()) {
+                if (notesResult.data!!.body()!!.isEmpty()) {
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 80.dp, start = 15.dp)
-                ) {
-                    Text(text = "No notes", fontWeight = FontWeight.Bold)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 80.dp, start = 15.dp)
+                    ) {
+                        Text(text = "No notes", fontWeight = FontWeight.Bold)
+                    }
+
+                } else if (!notesResult.data!!.body()!!.isEmpty()) {
+
+                   ListItem(authViewModel, token, navController, notesResult!!.data!!.body()!!)
                 }
 
-            } else {
-
-                ListItem(authViewModel, token, navController, notesResult.data!!)
             }
 
+            Scaffold(floatingActionButton = {
+
+                FloatingActionButton(
+                    onClick = {
+
+                        navController.navigate("addNotes/$token/${title}/${body}/idis0/status/created/updated/userId")
+                    }, backgroundColor = Color.Cyan
+                ) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "To add Notes")
+                }
+            }) {}
         }
-
-        Scaffold(floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-
-                    navController.navigate("addNotes/$token/title/body/idis0/status/created/updated/userId")
-                }, backgroundColor = Color.Cyan
-            ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "To add Notes")
-            }
-        }) {}
     }
 }
-
-
 @Composable
 fun ListItem(
     authenticationViewModel: AuthenticationViewModel,
@@ -133,7 +150,7 @@ fun ListItem(
     ) {
         items(data) { item ->
 
-            var mutablestatetodelete by remember { mutableStateOf(false) }
+            var mutablestatetodelete = remember{mutableStateOf(false)}
             Card(
                 modifier = Modifier
                     .width(Dimension.width(value = 100f).dp)
@@ -167,20 +184,22 @@ fun ListItem(
                             maxLines = 1,
                             modifier = Modifier.padding(start = 6.dp, top = 8.dp)
                         )
+
                         Spacer(Modifier.weight(1f))
+                      //
+
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Delete",
                             modifier = Modifier
-                                .clickable {
-                                    mutablestatetodelete = true
-                                }
+                                .clickable{ mutablestatetodelete.value = true}
                                 .padding(end = 6.dp)
                                 .wrapContentSize(),
                             tint = Color.Red,
                         )
-                        if (mutablestatetodelete) {
-                            Delete(authenticationViewModel, token, item.id, navController)
+                        if (mutablestatetodelete.value == true) {
+                           Delete(authenticationViewModel, token, item.id, navController)
+
                         }
 
                     }
@@ -209,19 +228,19 @@ fun Delete(
     navController: NavController
 ) {
 
-    var stateOfAlertBox by remember { mutableStateOf(true) }
-    var deleteResponse by remember { mutableStateOf(false) }
-    var t = Toast.makeText(LocalContext.current, "Deleted sucessfully", Toast.LENGTH_SHORT)
+    val stateOfAlertBox = remember { mutableStateOf(true) }
+    val deleteResponse = remember { mutableStateOf(false) }
 
-    if (stateOfAlertBox) {
+
+    if (stateOfAlertBox.value == true) {
 
         AlertDialog(
-            onDismissRequest = { stateOfAlertBox = false },
+            onDismissRequest = { stateOfAlertBox.value = false },
             confirmButton = {
                 TextButton(
                     onClick = {
 
-                        deleteResponse = true
+                        deleteResponse.value = true
                     },
 
                     ) {
@@ -230,7 +249,7 @@ fun Delete(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { stateOfAlertBox = false }) {
+                TextButton(onClick = { stateOfAlertBox.value = false }) {
                     Text("No")
                 }
             },
@@ -239,7 +258,7 @@ fun Delete(
 
     }
 
-    if (deleteResponse == true) {
+    if (deleteResponse.value == true) {
         val deleteResponseData = produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
             initialValue = DataOrException(loading = true)
         ) {
@@ -250,15 +269,13 @@ fun Delete(
             CircularProgressIndicator()
         } else if (deleteResponseData.data!!.code() == 200) {
             navController.navigate("listofNotes/$token")
-            deleteResponse = false
-
+            deleteResponse.value = false
         } else {
-
             val toast =
                 Toast.makeText(LocalContext.current, "Something went wrong", Toast.LENGTH_LONG)
             toast.duration = 100
             toast.show()
-            deleteResponse = false
+            deleteResponse.value = false
         }
     }
 
