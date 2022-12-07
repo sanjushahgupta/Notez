@@ -35,4 +35,9 @@ interface NotezzApi {
     @POST("/auth/update")
     suspend fun updateAccount(@Header("Authorization") token: String, @Body accountDetails: AccountDetails ): Response<Unit>
 
+    //https://api.notezz.com/
+
+    @DELETE("auth/delete")
+    suspend fun deleteAccount(@Header("Authorization") token: String) : Response<Unit>
+
 }

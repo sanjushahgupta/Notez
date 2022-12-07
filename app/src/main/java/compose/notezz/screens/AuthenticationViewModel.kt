@@ -39,24 +39,21 @@ class AuthenticationViewModel @Inject constructor(val notezzRepo: NotezzRepo) : 
    suspend fun updateNote(token: String, id: Int, updateNoteRequest: updateNoteRequest): DataOrException<Response<Note>, Boolean, Exception>{
        return notezzRepo.updateNote(token,id,updateNoteRequest)
    }
+
     suspend fun signUp(usernameandPassword: UsernameandPassword): DataOrException<Response<ResponseofSignUpAndLogIn>, Boolean, Exception>{
         return notezzRepo.signUp(usernameandPassword)
     }
 
     suspend fun forgotPassword(userEmail:UserEmail):DataOrException<Response<Unit>, Boolean, Exception>{
-
-
-            return notezzRepo.forgotPassword(userEmail)
-
-
+        return notezzRepo.forgotPassword(userEmail)
     }
 
     suspend fun updateAccount(token: String, accountDetails: AccountDetails):DataOrException<Response<Unit>, Boolean, Exception>{
-
-           return notezzRepo.updateAccount(token, accountDetails)
-
-
+        return notezzRepo.updateAccount(token, accountDetails)
     }
 
+    suspend fun deleteAccount(token: String): DataOrException<Response<Unit>, Boolean, Exception>{
+        return notezzRepo.deleteAccount(token)
+    }
 
 }

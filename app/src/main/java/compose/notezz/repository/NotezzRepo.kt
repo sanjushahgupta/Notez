@@ -98,4 +98,15 @@ suspend fun updateAccount(token: String, accountDetails: AccountDetails): DataOr
 
 }
 
+    suspend fun deleteAccount(token:String): DataOrException<Response<Unit>, Boolean, Exception>{
+
+        val response = try{
+            api.deleteAccount(token)
+        }catch(e: Exception){
+            return DataOrException(e =e)
+        }
+        return DataOrException(response)
+
+    }
+
 }

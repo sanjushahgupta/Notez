@@ -2,15 +2,13 @@ package compose.notezz.screens
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.foundation.ScrollState.Companion.Saver
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -29,9 +27,11 @@ import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.AccountDetails
 import compose.notezz.model.UserEmail
 import compose.notezz.model.UserPreference
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import retrofit2.Response
-
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "WrongConstant")
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "WrongConstant","CoroutineCreationDuringComposition")
 @Composable
 fun Account(token: String, navController: NavController) {
     val authViewModel: AuthenticationViewModel = hiltViewModel()
@@ -43,6 +43,10 @@ fun Account(token: String, navController: NavController) {
     val DeleteAccountStatus = remember { mutableStateOf(false) }
     val context = LocalContext.current
     val dataStore = UserPreference(context)
+    val stateOfAlertBox = remember{mutableStateOf(true)}
+    val deleteAlertBox = remember{mutableStateOf(false)}
+    val scope = rememberCoroutineScope()
+
 
     Scaffold(topBar = {
         TopAppBar(
@@ -109,7 +113,7 @@ fun Account(token: String, navController: NavController) {
             text = "Username",
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
             fontWeight = FontWeight.Bold,
-            //  color = Color(R.color.textColor)
+
         )
         OutlinedTextField(
             value = username.value,
@@ -194,7 +198,7 @@ fun Account(token: String, navController: NavController) {
                     CircularProgressIndicator()
                 } else if(updateResponseData.data!!.code() == 201){
 
-                    val toast = Toast.makeText(LocalContext.current,"Updated Sucessfully.",Toast.LENGTH_SHORT)
+                    val toast = Toast.makeText(LocalContext.current,"Account updated.",Toast.LENGTH_SHORT)
                     toast.duration = 100
                     toast.show()
                     UpdateAccountStatus.value = false
@@ -206,13 +210,12 @@ fun Account(token: String, navController: NavController) {
                     UpdateAccountStatus.value = false
                 }
 
-
-
             }
         }
 
         Button(
-            onClick = { },
+            onClick = {DeleteAccountStatus.value = true
+                        stateOfAlertBox.value = true},
 
             ) {
             Icon(
@@ -230,5 +233,75 @@ fun Account(token: String, navController: NavController) {
             )
         }
         Spacer(modifier = Modifier.padding(bottom = 8.dp))
+
+        if(DeleteAccountStatus.value == true) {
+            if (stateOfAlertBox.value == true) {
+
+                AlertDialog(
+                    onDismissRequest = { stateOfAlertBox.value = false
+                                        DeleteAccountStatus.value = false},
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+
+                                deleteAlertBox.value = true
+                            },
+
+                            ) {
+                            Text("Yes")
+
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { stateOfAlertBox.value = false
+                            DeleteAccountStatus.value = false}) {
+                            Text("No")
+                        }
+                    },
+                    title = { Text("Are you sure? This is irreversible!") },
+                )
+
+            }
+            if (deleteAlertBox.value == true){
+            val responseData =
+                produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
+                    initialValue = DataOrException(
+                        loading = true
+                    )
+                ) {
+                    value = authViewModel.deleteAccount(
+                        "Bearer" + " " + token)
+                }.value
+
+                if(responseData.loading == true){
+                    CircularProgressIndicator()
+                }else if (responseData.data!!.code() == 200)
+                {
+                    val toast = Toast.makeText(LocalContext.current, "Account deleted", Toast.LENGTH_SHORT)
+                    toast.duration = 100
+                    toast.show()
+                    scope.launch{
+                        async {
+                            dataStore.saveLoginStatus("loggedOut")
+                            delay(200)
+                            navController.navigate("login")
+                        }
+                    }
+                    DeleteAccountStatus.value = false
+
+                }
+                else{
+                    val toast = Toast.makeText(LocalContext.current, "something went wrong", Toast.LENGTH_SHORT)
+                    toast.duration = 100
+                    toast.show()
+
+
+                }
+            }
+
+        }
+
+
+
     }
 }
