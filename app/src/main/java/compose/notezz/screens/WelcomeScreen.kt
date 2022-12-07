@@ -2,6 +2,7 @@ package compose.notezz.screens
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
@@ -45,12 +46,16 @@ fun WelcomeScreen(navController: NavController) {
             val token = it.toString()
             async {
                 delay(2000)
-                if (token.equals("0")) {
+                Log.d("tokenFound", "Fetched in welcome screen token: " + token)
 
+                if (token.equals("loggedOut")) {
+                    Log.d("tokenFound", "Redirecting to login: loggedOut")
                     navController.navigate("logIn")
                 }else{
-                    // navController.navigate("listofNotes/$token")
-                    navController.navigate("logIn")
+                    Log.d("tokenFound", "Sending to listOfNotes with: $token")
+                    navController.navigate("listofNotes/$token")
+                   // navController.navigate("logIn")
+
                 }
             }.await()
 

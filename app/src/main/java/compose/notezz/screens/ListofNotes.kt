@@ -1,10 +1,10 @@
 package compose.notezz.screens
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,6 +29,8 @@ import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.Note
 import compose.notezz.model.UserPreference
 import compose.notezz.util.Dimension
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.Response
 
@@ -41,8 +43,6 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val dataStore = UserPreference(context)
-    var loginStatus by remember { mutableStateOf("") }
-
 
     val notesResult = produceState<DataOrException<Response<ArrayList<Note>>, Boolean, Exception>>(
         initialValue = DataOrException(loading = true)
@@ -53,12 +53,14 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
     if (notesResult.loading == true) {
         CircularProgressIndicator()
 
-    } else if (notesResult.data!!.code() == 401) {
-        token = "0"
-        navController.navigate("logIn")
-        loginStatus = "0"
+    } else if (notesResult.data!!.code() != 200) {
+        CircularProgressIndicator()
         scope.launch {
-            dataStore.saveLoginStatus("0")
+            dataStore.saveLoginStatus("loggedOut")
+            async {
+                delay(200)
+                navController.navigate("logIn")
+            }
         }
 
     } else {
@@ -67,7 +69,11 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
                 modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
 
             ) {
-                // Text("The text is "+token)
+                // Text("Passed token " + token)
+                Log.d("tokenFound", "Passed token: " + token)
+
+
+
 
                 Icon(
                     modifier = Modifier.padding(start = 10.dp),
@@ -83,54 +89,52 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
                     modifier = Modifier
                         .padding(end = 10.dp)
                         .clickable {
-                            token = "0"
-                            navController.navigate("logIn")
-                            loginStatus = "0"
                             scope.launch {
-                                dataStore.saveLoginStatus("0")
+                                dataStore.saveLoginStatus("loggedOut")
                             }
+                            navController.navigate("logIn")
                         })
             }
 
         }) {}
 
+         Column {
+          var title = " "
+          var body = " "
+          if (notesResult.loading == true) {
+              CircularProgressIndicator()
 
-        Column {
-            var title = " "
-            var body = " "
-            if (notesResult.loading == true) {
-                CircularProgressIndicator()
+          } else if (notesResult.data!!.code() == 200) {
 
-            } else if (notesResult.data!!.code() == 200) {
+              if (notesResult.data!!.body()!!.isEmpty()) {
 
-                if (notesResult.data!!.body()!!.isEmpty()) {
+                  Row(
+                      verticalAlignment = Alignment.CenterVertically,
+                      modifier = Modifier.padding(top = 80.dp, start = 15.dp)
+                  ) {
+                      Text(text = "No notes", fontWeight = FontWeight.Bold)
+                  }
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(top = 80.dp, start = 15.dp)
-                    ) {
-                        Text(text = "No notes", fontWeight = FontWeight.Bold)
-                    }
+              } else if (!notesResult.data!!.body()!!.isEmpty()) {
 
-                } else if (!notesResult.data!!.body()!!.isEmpty()) {
+                 ListItem(authViewModel, token, navController, notesResult!!.data!!.body()!!)
+              }
 
-                   ListItem(authViewModel, token, navController, notesResult!!.data!!.body()!!)
-                }
+          }
 
-            }
+          Scaffold(floatingActionButton = {
 
-            Scaffold(floatingActionButton = {
+              FloatingActionButton(
+                  onClick = {
 
-                FloatingActionButton(
-                    onClick = {
+                      navController.navigate("addNotes/$token/${title}/${body}/idis0/status/created/updated/userId")
+                  }, backgroundColor = Color.Cyan
+              ) {
+                  Icon(imageVector = Icons.Default.Add, contentDescription = "To add Notes")
+              }
+          }) {}
+      }
 
-                        navController.navigate("addNotes/$token/${title}/${body}/idis0/status/created/updated/userId")
-                    }, backgroundColor = Color.Cyan
-                ) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "To add Notes")
-                }
-            }) {}
-        }
     }
 }
 @Composable
@@ -150,7 +154,7 @@ fun ListItem(
     ) {
         items(data) { item ->
 
-            var mutablestatetodelete = remember{mutableStateOf(false)}
+            var mutablestatetodelete = remember { mutableStateOf(false) }
             Card(
                 modifier = Modifier
                     .width(Dimension.width(value = 100f).dp)
@@ -186,19 +190,18 @@ fun ListItem(
                         )
 
                         Spacer(Modifier.weight(1f))
-                      //
 
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Delete",
                             modifier = Modifier
-                                .clickable{ mutablestatetodelete.value = true}
+                                .clickable { mutablestatetodelete.value = true }
                                 .padding(end = 6.dp)
                                 .wrapContentSize(),
                             tint = Color.Red,
                         )
                         if (mutablestatetodelete.value == true) {
-                           Delete(authenticationViewModel, token, item.id, navController)
+                              Delete(authenticationViewModel, token, item.id, navController)
 
                         }
 
