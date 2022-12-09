@@ -2,22 +2,31 @@ package compose.notezz.screens
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Gray
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -27,6 +36,7 @@ import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.ResponseofSignUpAndLogIn
 import compose.notezz.model.UserPreference
 import compose.notezz.model.UsernameandPassword
+import compose.notezz.util.Dimension
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.Response
@@ -56,24 +66,27 @@ fun SignUpScreen(navController: NavController) {
 
             Icon(
                 modifier = Modifier.padding(start = 10.dp),
-                tint = Color.Cyan,
+                tint = colorResource(id = R.color.LogiTint),
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "logo"
             )
-            Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
+          //  Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
         }
     }) {}
 
     var focus = LocalFocusManager.current
     Column(
+
         modifier = Modifier
             .clickable(MutableInteractionSource(),
                 indication = null,
                 onClick = { focus.clearFocus() })
             .fillMaxWidth()
-            .fillMaxWidth()
-            .padding(start = 10.dp, end = 10.dp),
-        verticalArrangement = Arrangement.Center
+            .padding(
+                top = Dimension.height(value = 1f).dp,
+                start = Dimension.height(value = 0.5f).dp
+            )
+            .padding(start = 10.dp, end = 10.dp),verticalArrangement = Arrangement.Center
     ) {
 
         Text(
@@ -86,7 +99,7 @@ fun SignUpScreen(navController: NavController) {
         Divider()
         Text(
             text = "Register below and start taking notes in seconds.",
-            modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
+            modifier = Modifier.padding(bottom = 5.dp, top = Dimension.height(value = 0.8f).dp),
             fontSize = 16.sp,
 
             // color = Color(R.color.textColor)
@@ -95,22 +108,21 @@ fun SignUpScreen(navController: NavController) {
         Text(
             text = "Username",
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
-            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp
             //  color = Color(R.color.textColor)
         )
         OutlinedTextField(
             value = username.value,
             onValueChange = { username.value = it },
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
+            placeholder = {Text("Enter Username")})
 
-        )
+        Spacer(modifier = Modifier.padding(bottom = Dimension.height(value = 1f).dp))
 
-        Spacer(modifier = Modifier.padding(bottom = 15.dp))
         Text(
             text = "Password",
+            fontSize = 16.sp,
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
-            fontWeight = FontWeight.Bold,
         )
         OutlinedTextField(
             value = password.value,
@@ -119,38 +131,45 @@ fun SignUpScreen(navController: NavController) {
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = PasswordVisualTransformation(),
-            colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
-
+            placeholder = {Text("Enter password")}
         )
-        Spacer(modifier = Modifier.padding(bottom = 15.dp))
+
+        Spacer(modifier = Modifier.padding(top = Dimension.height(value = 1f).dp))
         Text(
+            fontSize = 16.sp,
             text = "Password confirmation",
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
-            fontWeight = FontWeight.Bold,
             //  color = Color(R.color.textColor)
         )
         OutlinedTextField(
             value = confirmPassword.value,
             onValueChange = { confirmPassword.value = it },
             modifier = Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation()
+            visualTransformation = PasswordVisualTransformation(),
+            placeholder = {Text("Confirm password")}
 
         )
 
         Spacer(modifier = Modifier.padding(top = 15.dp))
+        HyperlinkText(
+            fullText = "By registering, you agree to our "+ "Terms and Conditions and Privacy Policy.",
 
-        Text(
-            "By registering, you agree to our Terms and Conditions and Privacy Policy",
-            fontWeight = FontWeight.Bold,
-            // color = colorResource(id = R.color.blue)
+            hyperLinks = mutableMapOf(
+                "Terms and Conditions" to "https://notezz.com/terms",
+                "Privacy Policy" to "https://notezz.com/privacy"
+            ),
+            textStyle = TextStyle(
+              //  textAlign = TextAlign.Start,
+                color = colorResource(id = R.color.lightGray)
+            ),
+            linkTextColor = colorResource(id = R.color.blueish),
+            fontSize = 15.sp
         )
-
         Spacer(modifier = Modifier.padding(bottom = 12.dp))
 
         Button(
             onClick = { signUpButtton.value = true },
-
-            ) {
+            colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray))) {
 
 
             Icon(
@@ -174,9 +193,13 @@ fun SignUpScreen(navController: NavController) {
             style = MaterialTheme.typography.h6,
             // color = Color(R.color.textColor)
         )
+        Spacer(modifier = Modifier.padding(bottom = Dimension.height(value = 1f).dp))
+        Divider()
+        Spacer(modifier = Modifier.padding(bottom = Dimension.height(value = 1f).dp))
 
         Button(
             onClick = { navController.navigate("login") },
+            colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray))
 
             ) {
             Icon(
@@ -185,7 +208,7 @@ fun SignUpScreen(navController: NavController) {
                 contentDescription = "",
 
                 )
-
+            Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
             Text(
                 "Login", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.White
             )
@@ -259,4 +282,62 @@ fun SignUpScreen(navController: NavController) {
             }
         }
     }
+}
+@Composable
+fun HyperlinkText(
+    modifier: Modifier = Modifier,
+    fullText: String,
+    hyperLinks: Map<String, String>,
+    textStyle: TextStyle = TextStyle.Default,
+    linkTextColor: Color = Color.Blue,
+    linkTextFontWeight: FontWeight = FontWeight.Normal,
+    fontSize: TextUnit = TextUnit.Unspecified
+) {
+    val annotatedString = buildAnnotatedString {
+        append(fullText)
+
+        for((key, value) in hyperLinks){
+
+            val startIndex = fullText.indexOf(key)
+            val endIndex = startIndex + key.length
+            addStyle(
+                style = SpanStyle(
+                    color = linkTextColor,
+                    fontSize = fontSize,
+                    fontWeight = linkTextFontWeight,
+
+                ),
+                start = startIndex,
+                end = endIndex
+            )
+            addStringAnnotation(
+                tag = "URL",
+                annotation = value,
+                start = startIndex,
+                end = endIndex
+            )
+        }
+        addStyle(
+            style = SpanStyle(
+                fontSize = fontSize
+            ),
+            start = 0,
+            end = fullText.length
+        )
+    }
+
+    val uriHandler = LocalUriHandler.current
+
+    ClickableText(
+        modifier = modifier,
+        text = annotatedString,
+        style = textStyle,
+        onClick = {
+            annotatedString
+                .getStringAnnotations("URL", it, it)
+                .firstOrNull()?.let { stringAnnotation ->
+                    uriHandler.openUri(stringAnnotation.item)
+                }
+        }
+    )
 }

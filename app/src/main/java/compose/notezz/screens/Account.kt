@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -21,6 +22,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
 import compose.notezz.R
 import compose.notezz.dataorexception.DataOrException
@@ -55,7 +58,7 @@ fun Account(token: String, navController: NavController) {
 
             Icon(
                 modifier = Modifier.padding(start = 10.dp),
-                tint = Color.Cyan,
+                tint = colorResource(id = R.color.LogiTint),
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "logo"
             )
@@ -79,6 +82,7 @@ fun Account(token: String, navController: NavController) {
         Text(
             text = "Update account",
             color = Color.Black,
+            style = MaterialTheme.typography.h5,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 15.dp, top = 59.dp)
         )
@@ -91,17 +95,18 @@ fun Account(token: String, navController: NavController) {
             // color = Color(R.color.textColor)
         )
         Text(
-            text = "Email",
+            text = "Email", 
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
-            fontWeight = FontWeight.Bold,
+           // fontWeight = FontWeight.Bold,
 
             )
+
 
         OutlinedTextField(
             value = email.value,
             onValueChange = { email.value = it },
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
+           // colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
 
         )
         Text(
@@ -113,14 +118,14 @@ fun Account(token: String, navController: NavController) {
         Text(
             text = "Username",
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
-            fontWeight = FontWeight.Bold,
+           // fontWeight = FontWeight.Bold,
 
         )
         OutlinedTextField(
             value = username.value,
             onValueChange = { username.value = it },
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
+            //colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
 
         )
 
@@ -128,7 +133,7 @@ fun Account(token: String, navController: NavController) {
         Text(
             text = "Password",
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
-            fontWeight = FontWeight.Bold,
+            //fontWeight = FontWeight.Bold,
         )
         OutlinedTextField(
             value = password.value,
@@ -137,14 +142,14 @@ fun Account(token: String, navController: NavController) {
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = PasswordVisualTransformation(),
-            colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
+           // colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
 
         )
         Spacer(modifier = Modifier.padding(bottom = 15.dp))
         Text(
             text = "Password confirmation",
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
-            fontWeight = FontWeight.Bold,
+           // fontWeight = FontWeight.Bold,
             //  color = Color(R.color.textColor)
         )
         OutlinedTextField(
@@ -159,6 +164,7 @@ fun Account(token: String, navController: NavController) {
 
 
         Button(
+            colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray)),
             onClick = { UpdateAccountStatus.value = true },
 
             ) {
@@ -179,13 +185,15 @@ fun Account(token: String, navController: NavController) {
         }
 
         if (UpdateAccountStatus.value == true) {
-            if (username.value.isEmpty() || email.value.isEmpty() || username.value.length < 4) {
+           /* if (username.value.isEmpty() || email.value!!.isEmpty() || username.value.length < 4) {
                 val toast = Toast.makeText(LocalContext.current,"\"Please fill email and username field.Length of username must be more than 3 characters.",Toast.LENGTH_SHORT)
                 toast.duration = 100
                 toast.show()
                 UpdateAccountStatus.value = false
-            } else {
-                val updateResponseData = produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
+            } else*/{
+            }
+
+            val updateResponseData = produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
                     initialValue = DataOrException(
                         loading = true
                     )
@@ -202,7 +210,7 @@ fun Account(token: String, navController: NavController) {
                     toast.duration = 100
                     toast.show()
                     UpdateAccountStatus.value = false
-                    navController.navigate("listofNotes/$token")
+                   // navController.navigate("listofNotes/$token")
                 }else{
                     val toast = Toast.makeText(LocalContext.current,"Something went wrong.",Toast.LENGTH_SHORT)
                     toast.duration = 100
@@ -210,10 +218,11 @@ fun Account(token: String, navController: NavController) {
                     UpdateAccountStatus.value = false
                 }
 
-            }
+           // }
         }
 
         Button(
+            colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.Red)),
             onClick = {DeleteAccountStatus.value = true
                         stateOfAlertBox.value = true},
 
@@ -273,29 +282,31 @@ fun Account(token: String, navController: NavController) {
                         "Bearer" + " " + token)
                 }.value
 
-                if(responseData.loading == true){
-                    CircularProgressIndicator()
-                }else if (responseData.data!!.code() == 200)
-                {
-                    val toast = Toast.makeText(LocalContext.current, "Account deleted", Toast.LENGTH_SHORT)
-                    toast.duration = 100
-                    toast.show()
-                    scope.launch{
-                        async {
-                            dataStore.saveLoginStatus("loggedOut")
-                            delay(200)
-                            navController.navigate("login")
-                        }
+                when {
+                    responseData.loading == true -> {
+                        CircularProgressIndicator()
                     }
-                    DeleteAccountStatus.value = false
+                    responseData.data!!.code() == 200 -> {
+                        val toast = Toast.makeText(LocalContext.current, "Account deleted", Toast.LENGTH_SHORT)
+                        toast.duration = 100
+                        toast.show()
+                        scope.launch{
+                            async {
+                                dataStore.saveLoginStatus("loggedOut")
+                                delay(200)
+                                navController.navigate("login")
+                            }
+                        }
+                        DeleteAccountStatus.value = false
 
-                }
-                else{
-                    val toast = Toast.makeText(LocalContext.current, "something went wrong", Toast.LENGTH_SHORT)
-                    toast.duration = 100
-                    toast.show()
+                    }
+                    else -> {
+                        val toast = Toast.makeText(LocalContext.current, "something went wrong", Toast.LENGTH_SHORT)
+                        toast.duration = 100
+                        toast.show()
 
 
+                    }
                 }
             }
 

@@ -2,13 +2,12 @@ package compose.notezz.screens
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,11 +27,10 @@ import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.ResponseofSignUpAndLogIn
 import compose.notezz.model.UserPreference
 import compose.notezz.model.UsernameandPassword
-import compose.notezz.navigation.navigationNavController
+import compose.notezz.util.Dimension
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.Response
-
 
 @SuppressLint(
     "SuspiciousIndentation",
@@ -40,17 +38,19 @@ import retrofit2.Response
     "CoroutineCreationDuringComposition",
     "WrongConstant"
 )
+
 @Composable
 fun LogInScreen(navController: NavController) {
 
     val authViewModel: AuthenticationViewModel = hiltViewModel()
-    val username = remember { mutableStateOf("ramniwash") }
-    val password = remember { mutableStateOf("2rxbjjbd") }
+    val username = remember { mutableStateOf("") }
+    val password = remember { mutableStateOf("") }
     var stateOfLoginButton = remember { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val dataStore = UserPreference(context)
     var loginStatus by remember { mutableStateOf("") }
+
     Scaffold(topBar = {
         TopAppBar(
             modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
@@ -58,13 +58,14 @@ fun LogInScreen(navController: NavController) {
 
             Icon(
                 modifier = Modifier.padding(start = 10.dp),
-                tint = Color.Cyan,
-                painter = painterResource(id = compose.notezz.R.drawable.logo),
+                tint = colorResource(id = R.color.LogiTint),
+                painter = painterResource(id = R.drawable.logo),
                 contentDescription = "logo"
             )
-           // Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
+            // Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
         }
     }) {}
+
     var focus = LocalFocusManager.current
     Column(
         modifier = Modifier
@@ -72,7 +73,10 @@ fun LogInScreen(navController: NavController) {
                 indication = null,
                 onClick = { focus.clearFocus() })
             .fillMaxWidth()
-            .fillMaxWidth()
+            .padding(
+                top = Dimension.height(value = 1f).dp,
+                start = Dimension.height(value = 0.5f).dp
+            )
             .padding(start = 10.dp, end = 10.dp),
         verticalArrangement = Arrangement.Center
     ) {
@@ -82,36 +86,37 @@ fun LogInScreen(navController: NavController) {
             style = MaterialTheme.typography.h5,
             color = Color.Black,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 15.dp, top = 59.dp)
+            modifier = Modifier.padding(bottom = 14.dp, top = 59.dp)
         )
+
         Divider()
+
         Text(
             text = "Login below to see your old notes.",
-            modifier = Modifier.padding(bottom = 8.dp, top = 8.dp),
-            fontSize = 18.sp
-            // color = Color(R.color.textColor)
+            modifier = Modifier.padding(bottom = 8.dp, top = Dimension.height(value = 0.8f).dp),
+            fontSize = 18.sp,
         )
 
         Text(
             text = "Username",
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
-            fontWeight = FontWeight.Bold,
-            //  color = Color(R.color.textColor)
+            fontSize = 16.sp
         )
+
         OutlinedTextField(
             value = username.value,
             onValueChange = { username.value = it },
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
+            placeholder = { Text("Enter username") }
+            //  colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
+                    )
 
-
-        )
-
-        Spacer(modifier = Modifier.padding(bottom = 20.dp))
+        Spacer(modifier = Modifier.padding(bottom = Dimension.height(value = 1f).dp))
         Text(
             text = "Password",
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
-            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp
+            // fontWeight = FontWeight.Bold,
             //  color = Color(R.color.textColor)
         )
 
@@ -119,16 +124,18 @@ fun LogInScreen(navController: NavController) {
             value = password.value,
             onValueChange = { password.value = it },
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black),
+            placeholder = { Text("Enter password") },
+            //  colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = PasswordVisualTransformation()
         )
 
-        Spacer(modifier = Modifier.padding(top = 15.dp))
+        Spacer(modifier = Modifier.padding(top = Dimension.height(value = 1.5f).dp))
 
 
         Button(
             onClick = { stateOfLoginButton.value = true },
+            colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray))
             // colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue)
         ) {
             Icon(
@@ -136,7 +143,9 @@ fun LogInScreen(navController: NavController) {
                 painter = painterResource(id = compose.notezz.R.drawable.ic_baseline_login_24),
                 contentDescription = ""
             )
+
             Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
+
             Text(
                 text = "Login",
                 fontWeight = FontWeight.Bold,
@@ -145,18 +154,18 @@ fun LogInScreen(navController: NavController) {
                 modifier = Modifier.padding(bottom = 5.dp, top = 5.dp)
             )
         }
-        Spacer(modifier = Modifier.padding(bottom = 12.dp))
+
+        Spacer(modifier = Modifier.padding(bottom = Dimension.height(value = 1f).dp))
+
         Text(
             "Forgot Password?",
             fontWeight = FontWeight.Bold,
-            color = colorResource(id = R.color.blue),
+            color = colorResource(id = R.color.blueish),
             modifier = Modifier.clickable { navController.navigate("forgotpassword/email") }
         )
 
+        Spacer(modifier = Modifier.padding(bottom = Dimension.height(value = 3f).dp))
 
-
-
-        Spacer(modifier = Modifier.padding(bottom = 15.dp))
         Text(
             "Don't have an account?",
             modifier = Modifier.padding(bottom = 5.dp, top = 5.dp),
@@ -165,8 +174,15 @@ fun LogInScreen(navController: NavController) {
             // color = Color(R.color.textColor)
         )
 
+        Spacer(modifier = Modifier.padding(bottom = Dimension.height(value = 1f).dp))
+
+        Divider()
+
+        Spacer(modifier = Modifier.padding(bottom = Dimension.height(value = 1f).dp))
+
         Button(
             onClick = { navController.navigate("signUp") },
+            colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray))
             //  colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue)
         ) {
             Icon(
@@ -183,7 +199,6 @@ fun LogInScreen(navController: NavController) {
 
 
         if (stateOfLoginButton.value == true) {
-
             val usernameandPassword = UsernameandPassword(username.value, password.value)
             val logInResponseData =
                 produceState<DataOrException<Response<ResponseofSignUpAndLogIn>, Boolean, Exception>>(
@@ -222,6 +237,5 @@ fun LogInScreen(navController: NavController) {
 
         }
     }
-
 
 }

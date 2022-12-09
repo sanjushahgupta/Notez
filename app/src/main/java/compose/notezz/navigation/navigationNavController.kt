@@ -23,9 +23,6 @@ fun navigationNavController() {
 
         composable("signUp") {
             SignUpScreen(navController = navController)
-            BackHandler() {
-                exitProcess(1)
-            }
         }
 
         composable("logIn") {
@@ -60,8 +57,7 @@ fun navigationNavController() {
         }
 
         composable("forgotpassword/{email}"){
-            ForgotPassword( it.arguments?.getString("email").toString(),
-                navController = navController)
+            ForgotPassword(navController = navController)
         }
 
         composable("updateAccount/{token}"){

@@ -3,4 +3,8 @@
     <string name="RequestLoginLink">Request Login Link</string>
     <string name="ForgotPasswordDescription">If you have saved email to your account before, you can request an unique one time login link through this form to access your account in case if you have forgotten your password.</string>
     <string name="Updateacount">We\'ll never share your email with anyone else. It will only be used for sending you login link if you ever forget your password.</string>
+
+
+
+
 </resources>

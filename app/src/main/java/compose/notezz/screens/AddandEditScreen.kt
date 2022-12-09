@@ -17,10 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import compose.notezz.R
 import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.Note
 import compose.notezz.model.NoteInfo
@@ -58,45 +60,42 @@ fun AddandEditScreen(
 
             Icon(
                 modifier = Modifier.padding(start = 10.dp),
-                tint = Color.Cyan,
-                painter = painterResource(id = compose.notezz.R.drawable.logo),
+                tint = colorResource(id = R.color.LogiTint),
+                painter = painterResource(id = R.drawable.logo),
                 contentDescription = "logo"
             )
-
-            Icon(
-                Icons.Default.Settings,
-                "",
-                modifier = Modifier
-                    .padding(start = 10.dp)
-                    .clickable { navController.navigate("updateAccount/$token") },
-                tint = Color.White
-            )
+            // Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
         }
     }) {}
 
     val focus = LocalFocusManager.current
-    Box(modifier = Modifier.fillMaxWidth(), Alignment.Center) {
+ //   Box(modifier = Modifier.fillMaxWidth(), Alignment.Center) {
         Column(
             modifier = Modifier
-                .padding(top = 55.dp)
                 .clickable(MutableInteractionSource(),
                     indication = null,
-                    onClick = { focus.clearFocus() }),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                    onClick = { focus.clearFocus() })
+                .fillMaxWidth()
+                .padding(
+                    top = Dimension.height(value = 1f).dp,
+                    start = Dimension.height(value = 0.5f).dp
+                )
+                .padding(start = 10.dp, end = 10.dp),
+            verticalArrangement = Arrangement.Center
         ) {
             Card(
                 modifier = Modifier
                     // .verticalScroll(ScrollState(1),true,)
                     .fillMaxWidth()
+                    .padding( top = 59.dp)
                     .height(Dimension.height(value = 10f).dp), elevation = 20.dp
             ) {
-                TextField(
+                OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    modifier = Modifier.padding(5.dp),
-                    label = { Text("Title") },
-                    colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
+                   label = {Text("Title")}
+
+                   // colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
                 )
             }
 
@@ -108,36 +107,44 @@ fun AddandEditScreen(
                     .height(Dimension.height(value = 35f).dp),
                 elevation = 20.dp,
             ) {
-                TextField(value = body,
+
+                OutlinedTextField(value = body,
                     onValueChange = { body = it },
-                    colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black),
-                    modifier = Modifier.padding(5.dp),
-                    label = { Text(text = "Description") })
+                    label = {Text("Description")}
+                   // colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black),
+                    )
             }
             Spacer(modifier = Modifier.padding(top = 20.dp))
 
 
             if (noteId.equals("idis0")) {
 
-                Button(onClick = { addState.value = true }, modifier = Modifier.wrapContentSize()) {
+                Button(onClick = { addState.value = true }, modifier = Modifier.wrapContentSize()
+                    .padding(start = Dimension.height(value = 15f).dp),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray))) {
                     Icon(
                         painter = painterResource(id = compose.notezz.R.drawable.ic_baseline_save_24),
-                        contentDescription = "save"
+                        contentDescription = "save",
+                        tint =Color.White
                     )
-                    // Spacer(modifier = Modifier.size(ButtonDefaults.IconSize))
-                    Text("Add Note")
+                    Spacer(modifier = Modifier.size(ButtonDefaults.IconSize))
+                    Text("Add Note", color = Color.White)
+
                 }
 
             } else if (!noteId.equals("idis0")) {
                 Button(
                     onClick = { updateState.value = true }, modifier = Modifier.wrapContentSize()
+                    .padding(start = Dimension.height(value = 15f).dp),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray))
                 ) {
                     Icon(
                         painter = painterResource(id = compose.notezz.R.drawable.ic_baseline_save_24),
-                        contentDescription = "update"
+                        contentDescription = "update",
+                        tint =Color.White
                     )
-                    // Spacer(modifier = Modifier.size(ButtonDefaults.IconSize))
-                    Text("Update Note")
+                    Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
+                    Text("Update Note", color = Color.White)
                 }
             }
 
@@ -228,5 +235,5 @@ fun AddandEditScreen(
             }
         }
 
-    }
+  //  }
 }

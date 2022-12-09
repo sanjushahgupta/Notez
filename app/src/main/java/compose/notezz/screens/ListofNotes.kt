@@ -13,11 +13,13 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -71,31 +73,38 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
                 modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
 
             ) {
-                // Text("Passed token " + token)
+
                 Log.d("tokenFound", "Passed token: " + token)
-
-
-
 
                 Icon(
                     modifier = Modifier.padding(start = 10.dp),
-                    tint = Color.Cyan,
+                    tint = colorResource(id = R.color.LogiTint),
                     painter = painterResource(id = R.drawable.logo),
                     contentDescription = "logo"
                 )
                 Spacer(Modifier.weight(1f))
 
-                Icon(tint = Color.White,
+                Icon(
+                    Icons.Default.Settings,
+                    "",
+                    modifier = Modifier
+                        .padding(start = 10.dp,end = 8.dp)
+                        .clickable { navController.navigate("updateAccount/$token") },
+                    tint = Color.Gray
+                )
+                Spacer(Modifier.padding(end = 15.dp))
+                Icon(tint = Color.Gray,
                     painter = painterResource(id = R.drawable.ic_baseline_logout_24),
                     contentDescription = "logout",
                     modifier = Modifier
-                        .padding(end = 10.dp)
+                        .padding(end = 6.dp)
                         .clickable {
                             scope.launch {
                                 dataStore.saveLoginStatus("loggedOut")
                             }
                             navController.navigate("logIn")
                         })
+
             }
 
         }) {}
@@ -125,14 +134,13 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
             }
 
             Scaffold(floatingActionButton = {
-
                 FloatingActionButton(
                     onClick = {
 
                         navController.navigate("addNotes/$token/${title}/${body}/idis0/status/created/updated/userId")
-                    }, backgroundColor = Color.Cyan
+                    }, backgroundColor = colorResource(id = R.color.LogiTint)
                 ) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "To add Notes")
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "To add Notes", tint = Color.White)
                 }
             }) {}
         }
@@ -153,8 +161,8 @@ fun ListItem(
         modifier = Modifier
             .fillMaxWidth()
             .width(Dimension.width(value = 82f).dp)
-            .height(Dimension.height(value = 82f).dp)
-            .background(Color.LightGray)
+           .height(Dimension.height(value = 82f).dp)
+            .background(Color.White)
     ) {
         items(data) { item ->
 
@@ -166,7 +174,7 @@ fun ListItem(
                     .width(Dimension.width(value = 100f).dp)
                     .height(Dimension.height(value = 12f).dp)
                     .padding(10.dp),
-                shape = RoundedCornerShape(20),
+                shape = RoundedCornerShape(8),
                 elevation = 20.dp
             ) {
 
@@ -204,7 +212,8 @@ fun ListItem(
                                 .clickable { stateOfAlertBox.value = true }
                                 .padding(end = 6.dp)
                                 .wrapContentSize(),
-                            tint = Color.Red,
+                            tint = Color.DarkGray,
+
                         )
                         if (stateOfAlertBox.value == true) {
                             AlertDialog(
