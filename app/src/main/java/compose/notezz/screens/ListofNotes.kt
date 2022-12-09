@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -45,7 +44,6 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val dataStore = UserPreference(context)
-
 
 
     val notesResult = produceState<DataOrException<Response<ArrayList<Note>>, Boolean, Exception>>(
@@ -88,7 +86,7 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
                     Icons.Default.Settings,
                     "",
                     modifier = Modifier
-                        .padding(start = 10.dp,end = 8.dp)
+                        .padding(start = 10.dp, end = 8.dp)
                         .clickable { navController.navigate("updateAccount/$token") },
                     tint = Color.Gray
                 )
@@ -108,45 +106,55 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
             }
 
         }) {}
+        Column(
 
-        Column {
-            var title = " "
-            var body = " "
-            if (notesResult.loading == true) {
-                CircularProgressIndicator()
-
-            } else if (notesResult.data!!.code() == 200) {
-
-                if (notesResult.data!!.body()!!.isEmpty()) {
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(top = 80.dp, start = 15.dp)
-                    ) {
-                        Text(text = "No notes", fontWeight = FontWeight.Bold)
-                    }
-
-                } else if (!notesResult.data!!.body()!!.isEmpty()) {
-
-                    ListItem(authViewModel, token, navController, notesResult.data!!.body()!!)
-                }
-
-            }
-
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    top = Dimension.height(value = 8f).dp, start = Dimension.height(value = 0.5f).dp
+                ), verticalArrangement = Arrangement.Center
+        ) {
             Scaffold(floatingActionButton = {
+                var title = " "
+                var body = " "
                 FloatingActionButton(
                     onClick = {
 
                         navController.navigate("addNotes/$token/${title}/${body}/idis0/status/created/updated/userId")
                     }, backgroundColor = colorResource(id = R.color.LogiTint)
                 ) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "To add Notes", tint = Color.White)
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "To add Notes",
+                        tint = Color.White
+                    )
                 }
-            }) {}
+            }) {
+                if (notesResult.loading == true) {
+                    CircularProgressIndicator()
+
+                } else if (notesResult.data!!.code() == 200) {
+
+                    if (notesResult.data!!.body()!!.isEmpty()) {
+
+
+                        Text(text = "No notes", fontWeight = FontWeight.Bold)
+
+
+                    } else if (!notesResult.data!!.body()!!.isEmpty()) {
+                        ListItem(authViewModel, token, navController, notesResult.data!!.body()!!)
+
+                    }
+                }
+            }
+
+
         }
+
 
     }
 }
+
 
 @SuppressLint("UnrememberedMutableState", "WrongConstant")
 @Composable
@@ -160,22 +168,22 @@ fun ListItem(
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .width(Dimension.width(value = 82f).dp)
-           .height(Dimension.height(value = 82f).dp)
+            .fillMaxHeight()
             .background(Color.White)
     ) {
         items(data) { item ->
 
-            var mutablestatetodelete = remember { mutableStateOf(false) }
-            var stateOfAlertBox = remember{mutableStateOf(false)}
+            val mutablestatetodelete = remember { mutableStateOf(false) }
+            val stateOfAlertBox = remember { mutableStateOf(false) }
 
             Card(
                 modifier = Modifier
                     .width(Dimension.width(value = 100f).dp)
-                    .height(Dimension.height(value = 12f).dp)
-                    .padding(10.dp),
+                    .height(Dimension.height(value = 11f).dp)
+                    .padding(8.dp),
                 shape = RoundedCornerShape(8),
-                elevation = 20.dp
+                elevation = 20.dp,
+                backgroundColor = Color.White
             ) {
 
                 Column(
@@ -212,9 +220,9 @@ fun ListItem(
                                 .clickable { stateOfAlertBox.value = true }
                                 .padding(end = 6.dp)
                                 .wrapContentSize(),
-                            tint = Color.DarkGray,
+                            tint = Color(0xFFFFC107)
 
-                        )
+                            )
                         if (stateOfAlertBox.value == true) {
                             AlertDialog(
                                 onDismissRequest = { stateOfAlertBox.value = false },
@@ -241,11 +249,12 @@ fun ListItem(
                         }
 
                         if (mutablestatetodelete.value) {
-                            val deleteResponseData = produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
-                                initialValue = DataOrException(loading = true)
-                            ) {
-                                value = authenticationViewModel.deleteNote(token, item.id)
-                            }.value
+                            val deleteResponseData =
+                                produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
+                                    initialValue = DataOrException(loading = true)
+                                ) {
+                                    value = authenticationViewModel.deleteNote(token, item.id)
+                                }.value
 
                             if (deleteResponseData.loading == true) {
                                 CircularProgressIndicator()
@@ -254,7 +263,9 @@ fun ListItem(
                                 mutablestatetodelete.value = false
 
                             } else {
-                                val toast = Toast.makeText(LocalContext.current, "Something went wrong", Toast.LENGTH_LONG)
+                                val toast = Toast.makeText(
+                                    LocalContext.current, "Something went wrong", Toast.LENGTH_LONG
+                                )
                                 toast.duration = 100
                                 toast.show()
                                 navController.navigate("listofNotes/$token")
