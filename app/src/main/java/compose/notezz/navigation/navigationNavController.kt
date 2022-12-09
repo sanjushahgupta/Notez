@@ -61,10 +61,9 @@ fun navigationNavController() {
         }
 
         composable("updateAccount/{token}"){
-            Account(it.arguments?.getString("token").toString(),navController = navController)
+            Account(it.arguments?.getString("token").toString(),
+                navController = navController)
         }
-
-
     }
 
 }

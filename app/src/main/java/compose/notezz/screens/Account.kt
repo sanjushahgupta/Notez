@@ -34,9 +34,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.Response
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "WrongConstant","CoroutineCreationDuringComposition")
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "WrongConstant","CoroutineCreationDuringComposition",
+    "SuspiciousIndentation"
+)
 @Composable
-fun Account(token: String, navController: NavController) {
+fun Account(token: String,navController: NavController) {
     val authViewModel: AuthenticationViewModel = hiltViewModel()
     val username = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
@@ -46,8 +48,8 @@ fun Account(token: String, navController: NavController) {
     val DeleteAccountStatus = remember { mutableStateOf(false) }
     val context = LocalContext.current
     val dataStore = UserPreference(context)
-    val stateOfAlertBox = remember{mutableStateOf(true)}
-    val deleteAlertBox = remember{mutableStateOf(false)}
+    val stateOfAlertBox = remember { mutableStateOf(true) }
+    val deleteAlertBox = remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
 
@@ -95,18 +97,18 @@ fun Account(token: String, navController: NavController) {
             // color = Color(R.color.textColor)
         )
         Text(
-            text = "Email", 
+            text = "Email",
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
-           // fontWeight = FontWeight.Bold,
+            // fontWeight = FontWeight.Bold,
 
-            )
+        )
 
 
         OutlinedTextField(
             value = email.value,
             onValueChange = { email.value = it },
             modifier = Modifier.fillMaxWidth(),
-           // colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
+            // colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
 
         )
         Text(
@@ -118,13 +120,14 @@ fun Account(token: String, navController: NavController) {
         Text(
             text = "Username",
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
-           // fontWeight = FontWeight.Bold,
+            // fontWeight = FontWeight.Bold,
 
         )
         OutlinedTextField(
             value = username.value,
             onValueChange = { username.value = it },
             modifier = Modifier.fillMaxWidth(),
+            placeholder = {Text(username.value)}
             //colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
 
         )
@@ -142,14 +145,14 @@ fun Account(token: String, navController: NavController) {
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = PasswordVisualTransformation(),
-           // colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
+            // colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
 
         )
         Spacer(modifier = Modifier.padding(bottom = 15.dp))
         Text(
             text = "Password confirmation",
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
-           // fontWeight = FontWeight.Bold,
+            // fontWeight = FontWeight.Bold,
             //  color = Color(R.color.textColor)
         )
         OutlinedTextField(
@@ -165,7 +168,8 @@ fun Account(token: String, navController: NavController) {
 
         Button(
             colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray)),
-            onClick = { UpdateAccountStatus.value = true },
+            onClick = { UpdateAccountStatus.value = true
+                focus.clearFocus()},
 
             ) {
 
@@ -185,46 +189,55 @@ fun Account(token: String, navController: NavController) {
         }
 
         if (UpdateAccountStatus.value == true) {
-           /* if (username.value.isEmpty() || email.value!!.isEmpty() || username.value.length < 4) {
-                val toast = Toast.makeText(LocalContext.current,"\"Please fill email and username field.Length of username must be more than 3 characters.",Toast.LENGTH_SHORT)
+            if (username.value.isEmpty() && password.value.isEmpty()) {
+                val toast =
+                    Toast.makeText(LocalContext.current, "username and password cannot be empty.", Toast.LENGTH_SHORT)
                 toast.duration = 100
                 toast.show()
-                UpdateAccountStatus.value = false
-            } else*/{
-            }
-
-            val updateResponseData = produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
+            }else{
+            val updateResponseData: DataOrException<Response<Unit>, Boolean, Exception>
+            updateResponseData =
+                produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
                     initialValue = DataOrException(
                         loading = true
                     )
                 ) {
-                    value =  authViewModel.updateAccount(
-                        "Bearer" + " " + token, AccountDetails(username.value, email.value)
+                    value = authViewModel.updateAccount(
+                        "Bearer" + " " + token,
+
+                        AccountDetails(username.value, email.value, password.value)
                     )
                 }.value
 
-                if(updateResponseData.loading == true){
-                    CircularProgressIndicator()
-                } else if(updateResponseData.data!!.code() == 201){
-                    val toast = Toast.makeText(LocalContext.current,"Account updated.",Toast.LENGTH_SHORT)
-                    toast.duration = 100
-                    toast.show()
-                    UpdateAccountStatus.value = false
-                   // navController.navigate("listofNotes/$token")
-                }else{
-                    val toast = Toast.makeText(LocalContext.current,"Something went wrong.",Toast.LENGTH_SHORT)
-                    toast.duration = 100
-                    toast.show()
-                    UpdateAccountStatus.value = false
-                }
+            if (updateResponseData.loading == true) {
+                CircularProgressIndicator()
+            } else if (updateResponseData.data!!.code() == 201) {
+                val toast =
+                    Toast.makeText(LocalContext.current, "Account updated.", Toast.LENGTH_SHORT)
+                toast.duration = 100
+                toast.show()
+                UpdateAccountStatus.value = false
+            } else {
+                val toast = Toast.makeText(
+                    LocalContext.current,
+                    updateResponseData.e?.message.toString(),
+                    Toast.LENGTH_SHORT
+                )
+                toast.duration = 100
+                toast.show()
 
-           // }
+                UpdateAccountStatus.value = false
+            }
+
+             }
         }
 
         Button(
             colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.Red)),
-            onClick = {DeleteAccountStatus.value = true
-                        stateOfAlertBox.value = true},
+            onClick = {
+                DeleteAccountStatus.value = true
+                stateOfAlertBox.value = true
+            },
 
             ) {
             Icon(
@@ -243,12 +256,14 @@ fun Account(token: String, navController: NavController) {
         }
         Spacer(modifier = Modifier.padding(bottom = 8.dp))
 
-        if(DeleteAccountStatus.value == true) {
+        if (DeleteAccountStatus.value == true) {
             if (stateOfAlertBox.value == true) {
 
                 AlertDialog(
-                    onDismissRequest = { stateOfAlertBox.value = false
-                                        DeleteAccountStatus.value = false},
+                    onDismissRequest = {
+                        stateOfAlertBox.value = false
+                        DeleteAccountStatus.value = false
+                    },
                     confirmButton = {
                         TextButton(
                             onClick = {
@@ -262,8 +277,10 @@ fun Account(token: String, navController: NavController) {
                         }
                     },
                     dismissButton = {
-                        TextButton(onClick = { stateOfAlertBox.value = false
-                            DeleteAccountStatus.value = false}) {
+                        TextButton(onClick = {
+                            stateOfAlertBox.value = false
+                            DeleteAccountStatus.value = false
+                        }) {
                             Text("No")
                         }
                     },
@@ -271,26 +288,31 @@ fun Account(token: String, navController: NavController) {
                 )
 
             }
-            if (deleteAlertBox.value == true)
-            {
-            val responseData = produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
-                    initialValue = DataOrException(
-                        loading = true
-                    )
-                ) {
-                    value = authViewModel.deleteAccount(
-                        "Bearer" + " " + token)
-                }.value
+            if (deleteAlertBox.value == true) {
+                val responseData =
+                    produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
+                        initialValue = DataOrException(
+                            loading = true
+                        )
+                    ) {
+                        value = authViewModel.deleteAccount(
+                            "Bearer" + " " + token
+                        )
+                    }.value
 
                 when {
                     responseData.loading == true -> {
                         CircularProgressIndicator()
                     }
                     responseData.data!!.code() == 200 -> {
-                        val toast = Toast.makeText(LocalContext.current, "Account deleted", Toast.LENGTH_SHORT)
+                        val toast = Toast.makeText(
+                            LocalContext.current,
+                            "Account deleted",
+                            Toast.LENGTH_SHORT
+                        )
                         toast.duration = 100
                         toast.show()
-                        scope.launch{
+                        scope.launch {
                             async {
                                 dataStore.saveLoginStatus("loggedOut")
                                 delay(200)
@@ -301,7 +323,11 @@ fun Account(token: String, navController: NavController) {
 
                     }
                     else -> {
-                        val toast = Toast.makeText(LocalContext.current, "something went wrong", Toast.LENGTH_SHORT)
+                        val toast = Toast.makeText(
+                            LocalContext.current,
+                            "something went wrong",
+                            Toast.LENGTH_SHORT
+                        )
                         toast.duration = 100
                         toast.show()
 
@@ -311,7 +337,6 @@ fun Account(token: String, navController: NavController) {
             }
 
         }
-
 
 
     }

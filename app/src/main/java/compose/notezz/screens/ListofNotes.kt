@@ -38,7 +38,7 @@ import retrofit2.Response
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
 @Composable
-fun HomeScreenListOfNotes(Token: String, navController: NavController) {
+fun HomeScreenListOfNotes(Token: String,navController: NavController) {
     val authViewModel: AuthenticationViewModel = hiltViewModel()
     var token = Token
     val context = LocalContext.current
@@ -142,6 +142,7 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
 
 
                     } else if (!notesResult.data!!.body()!!.isEmpty()) {
+
                         ListItem(authViewModel, token, navController, notesResult.data!!.body()!!)
 
                     }

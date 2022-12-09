@@ -2,7 +2,6 @@ package compose.notezz.screens
 
 import android.annotation.SuppressLint
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -109,7 +108,7 @@ fun LogInScreen(navController: NavController) {
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text("Enter username") }
             //  colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
-                    )
+        )
 
         Spacer(modifier = Modifier.padding(bottom = Dimension.height(value = 1f).dp))
         Text(
@@ -134,7 +133,8 @@ fun LogInScreen(navController: NavController) {
 
 
         Button(
-            onClick = { stateOfLoginButton.value = true },
+            onClick = { stateOfLoginButton.value = true
+                focus.clearFocus()},
             colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray))
             // colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue)
         ) {
@@ -181,7 +181,8 @@ fun LogInScreen(navController: NavController) {
         Spacer(modifier = Modifier.padding(bottom = Dimension.height(value = 1f).dp))
 
         Button(
-            onClick = { navController.navigate("signUp") },
+            onClick = { navController.navigate("signUp")
+                         focus.clearFocus()},
             colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray))
             //  colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue)
         ) {
@@ -199,43 +200,78 @@ fun LogInScreen(navController: NavController) {
 
 
         if (stateOfLoginButton.value == true) {
+
             val usernameandPassword = UsernameandPassword(username.value, password.value)
-            val logInResponseData =
-                produceState<DataOrException<Response<ResponseofSignUpAndLogIn>, Boolean, Exception>>(
-                    initialValue = DataOrException(
-                        loading = true
-                    )
-                ) {
-                    value = authViewModel.logIn(usernameandPassword)
-                }.value
 
-            if (logInResponseData.loading == true) {
-                CircularProgressIndicator()
-
-            } else if (logInResponseData.data!!.code() == 201) {
-
-                val Token = logInResponseData.data!!.body()!!.token
-
-                scope.launch {
-                    dataStore.saveLoginStatus(Token)
-                }
-
-                LaunchedEffect(Unit) {
-                    delay(200)
-                    navController.navigate("listofNotes/$Token")
-                }
-
-            } else {
-                // Text(text = "Exception:" + logInResponseData.data)
+            if (password.value.isEmpty() || username.value.isEmpty()) {
                 val toast =
-                    Toast.makeText(LocalContext.current, "Invalid credentials", Toast.LENGTH_SHORT)
+                    Toast.makeText(
+                        LocalContext.current,
+                        "Please fill out fields.",
+                        Toast.LENGTH_SHORT
+                    )
+                toast.duration = 100
+                toast.show()
+                stateOfLoginButton.value = false
+            } else if (username.value.length < 4) {
+                val toast = Toast.makeText(
+                    context,
+                    "Length of a username must be of 4 characters or more.",
+                    Toast.LENGTH_SHORT
+                )
+                toast.duration = 100
+                toast.show()
+                stateOfLoginButton.value = false
+            } else if (password.value.length < 6) {
+                val toast = Toast.makeText(
+                    context,
+                    "Length of a password must be of 6 characters or more.",
+                    Toast.LENGTH_SHORT
+                )
                 toast.duration = 100
                 toast.show()
                 stateOfLoginButton.value = false
 
-            }
+            } else {
+                val logInResponseData =
+                    produceState<DataOrException<Response<ResponseofSignUpAndLogIn>, Boolean, Exception>>(
+                        initialValue = DataOrException(
+                            loading = true
+                        )
+                    ) {
+                        value = authViewModel.logIn(usernameandPassword)
+                    }.value
 
+                if (logInResponseData.loading == true) {
+                    CircularProgressIndicator()
+
+                } else if (logInResponseData.data!!.code() == 201) {
+
+                    val Token = logInResponseData.data!!.body()!!.token
+
+                    scope.launch {
+                        dataStore.saveLoginStatus(Token)
+                    }
+
+                    LaunchedEffect(Unit) {
+                        delay(200)
+                        navController.navigate("listofNotes/$Token/${username.value}/${password.value}")
+                    }
+
+                } else {
+                    // Text(text = "Exception:" + logInResponseData.data)
+                    val toast =
+                        Toast.makeText(
+                            LocalContext.current,
+                            "Invalid credentials",
+                            Toast.LENGTH_SHORT
+                        )
+                    toast.duration = 100
+                    toast.show()
+                    stateOfLoginButton.value = false
+
+                }
+            }
         }
     }
-
 }

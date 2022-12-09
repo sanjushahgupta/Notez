@@ -168,7 +168,8 @@ fun SignUpScreen(navController: NavController) {
         Spacer(modifier = Modifier.padding(bottom = 12.dp))
 
         Button(
-            onClick = { signUpButtton.value = true },
+            onClick = { signUpButtton.value = true
+                focus.clearFocus()},
             colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray))) {
 
 
@@ -198,7 +199,8 @@ fun SignUpScreen(navController: NavController) {
         Spacer(modifier = Modifier.padding(bottom = Dimension.height(value = 1f).dp))
 
         Button(
-            onClick = { navController.navigate("login") },
+            onClick = { navController.navigate("login")
+                focus.clearFocus()},
             colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray))
 
             ) {

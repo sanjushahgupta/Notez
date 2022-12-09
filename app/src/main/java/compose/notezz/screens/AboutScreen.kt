@@ -1,5 +1,4 @@
 package compose.notezz.screens
-
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -49,8 +48,5 @@ fun AboutScreen (){
             .padding(start = 10.dp, end = 10.dp),
         verticalArrangement = Arrangement.Center
     ) {
-
-
-
     }
 }

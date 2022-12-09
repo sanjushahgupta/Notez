@@ -119,7 +119,8 @@ fun AddandEditScreen(
 
             if (noteId.equals("idis0")) {
 
-                Button(onClick = { addState.value = true }, modifier = Modifier.wrapContentSize()
+                Button(onClick = { addState.value = true
+                    focus.clearFocus()}, modifier = Modifier.wrapContentSize()
                     .padding(start = Dimension.height(value = 15f).dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray))) {
                     Icon(
@@ -134,7 +135,8 @@ fun AddandEditScreen(
 
             } else if (!noteId.equals("idis0")) {
                 Button(
-                    onClick = { updateState.value = true }, modifier = Modifier.wrapContentSize()
+                    onClick = { updateState.value = true
+                        focus.clearFocus()}, modifier = Modifier.wrapContentSize()
                     .padding(start = Dimension.height(value = 15f).dp),
                     colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray))
                 ) {
