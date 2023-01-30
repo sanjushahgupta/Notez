@@ -56,11 +56,9 @@ fun ForgotPassword(navController: NavController) {
                 onClick = { focus.clearFocus() })
             .fillMaxWidth()
             .padding(
-                top = Dimension.height(value = 1f).dp,
-                start = Dimension.height(value = 0.5f).dp
+                top = Dimension.height(value = 1f).dp, start = Dimension.height(value = 0.5f).dp
             )
-            .padding(start = 10.dp, end = 5.dp),
-        verticalArrangement = Arrangement.Center
+            .padding(start = 10.dp, end = 5.dp), verticalArrangement = Arrangement.Center
     ) {
 
         val emailID = remember { mutableStateOf("") }
@@ -81,8 +79,7 @@ fun ForgotPassword(navController: NavController) {
         Text(
             "Email",
             // color = Color.Black,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(8.dp)
+            fontWeight = FontWeight.Bold, modifier = Modifier.padding(8.dp)
         )
         OutlinedTextField(value = emailID.value,
             onValueChange = { emailID.value = it },
@@ -91,10 +88,16 @@ fun ForgotPassword(navController: NavController) {
                     text = "Enter email"
 
                 )
-            })
+            },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.Gray,
+                unfocusedBorderColor = Color.Gray,
+                cursorColor = Color.Black,
+                backgroundColor = Color.White
+            )
+        )
         Row(modifier = Modifier.padding(8.dp)) {
-            Button(
-                colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray)),
+            Button(colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray)),
                 onClick = {
                     forgotButton.value = true
                 }) {
@@ -119,9 +122,7 @@ fun ForgotPassword(navController: NavController) {
 
             if (emailID.value.isEmpty()) {
                 val toast = Toast.makeText(
-                    LocalContext.current,
-                    "Please check your input.",
-                    Toast.LENGTH_SHORT
+                    LocalContext.current, "Please check your input.", Toast.LENGTH_SHORT
                 )
                 toast.duration = 100
                 toast.show()
@@ -167,12 +168,15 @@ fun ForgotPassword(navController: NavController) {
             }
         }
 
-    Column(verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.CenterHorizontally) {
-        Image(
-            painter = painterResource(id = R.drawable.requestloginlink),
-            contentDescription = "requestlinkimage",
-            modifier = Modifier.padding(top = 20.dp,  start = Dimension.height(value = 8f).dp)
-        )
+        Column(
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.requestloginlink),
+                contentDescription = "requestlinkimage",
+                modifier = Modifier.padding(top = 20.dp, start = Dimension.height(value = 8f).dp)
+            )
+        }
     }
-}
 }

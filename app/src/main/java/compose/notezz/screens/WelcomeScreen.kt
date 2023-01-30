@@ -45,7 +45,7 @@ fun WelcomeScreen(navController: NavController) {
         dataStore.loginStatus.collect {
             val token = it.toString()
             async {
-                delay(2000)
+                delay(500)
                 if (token.equals("loggedOut")) {
                     navController.navigate("logIn")
                 }else{
@@ -61,16 +61,5 @@ fun WelcomeScreen(navController: NavController) {
     }
 
 
-
-    /*  val infiniteTransition = rememberInfiniteTransition()
-      val heartSize by infiniteTransition.animateFloat(
-          initialValue = 300.0f,
-          targetValue = 250.0f,
-          animationSpec = infiniteRepeatable(animation = tween(900, 900, FastOutLinearInEasing), repeatMode = RepeatMode.Reverse)
-      )
-      Image(painter = painterResource(id = compose.notezz.R.drawable.logo),
-          contentDescription = "logo",
-          modifier = Modifier.size(heartSize.dp)
-      )*/
 
 }

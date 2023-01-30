@@ -101,21 +101,20 @@ fun SignUpScreen(navController: NavController) {
             text = "Register below and start taking notes in seconds.",
             modifier = Modifier.padding(bottom = 5.dp, top = Dimension.height(value = 0.8f).dp),
             fontSize = 16.sp,
-
-            // color = Color(R.color.textColor)
-        )
+            )
 
         Text(
             text = "Username",
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
             fontSize = 16.sp
-            //  color = Color(R.color.textColor)
         )
         OutlinedTextField(
             value = username.value,
             onValueChange = { username.value = it },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = {Text("Enter Username")})
+            placeholder = {Text("Enter Username")},
+            colors = TextFieldDefaults.outlinedTextFieldColors( focusedBorderColor = Color.Gray,unfocusedBorderColor = Color.Gray, cursorColor = Color.Black, backgroundColor = Color.White)
+        )
 
         Spacer(modifier = Modifier.padding(bottom = Dimension.height(value = 1f).dp))
 
@@ -131,7 +130,8 @@ fun SignUpScreen(navController: NavController) {
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = PasswordVisualTransformation(),
-            placeholder = {Text("Enter password")}
+            placeholder = {Text("Enter password")},
+            colors = TextFieldDefaults.outlinedTextFieldColors( focusedBorderColor = Color.Gray,unfocusedBorderColor = Color.Gray, cursorColor = Color.Black, backgroundColor = Color.White)
         )
 
         Spacer(modifier = Modifier.padding(top = Dimension.height(value = 1f).dp))
@@ -141,13 +141,14 @@ fun SignUpScreen(navController: NavController) {
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
             //  color = Color(R.color.textColor)
         )
+
         OutlinedTextField(
             value = confirmPassword.value,
             onValueChange = { confirmPassword.value = it },
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),
-            placeholder = {Text("Confirm password")}
-
+            placeholder = {Text("Confirm password")},
+            colors = TextFieldDefaults.outlinedTextFieldColors( focusedBorderColor = Color.Gray,unfocusedBorderColor = Color.Gray, cursorColor = Color.Black, backgroundColor = Color.White)
         )
 
         Spacer(modifier = Modifier.padding(top = 15.dp))

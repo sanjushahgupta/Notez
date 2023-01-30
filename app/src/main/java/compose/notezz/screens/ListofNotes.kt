@@ -236,13 +236,13 @@ fun ListItem(
                                         },
 
                                         ) {
-                                        Text("Yes")
+                                        Text("Yes", color = Color.Black)
 
                                     }
                                 },
                                 dismissButton = {
                                     TextButton(onClick = { stateOfAlertBox.value = false }) {
-                                        Text("No")
+                                        Text("No", color = Color.Black)
                                     }
                                 },
                                 title = { Text("Are you sure you want to delete this item?") },

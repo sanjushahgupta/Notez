@@ -68,13 +68,13 @@ fun LogInScreen(navController: NavController) {
     var focus = LocalFocusManager.current
     Column(
         modifier = Modifier
-            .clickable(MutableInteractionSource(),
+            .clickable(
+                MutableInteractionSource(),
                 indication = null,
                 onClick = { focus.clearFocus() })
             .fillMaxWidth()
             .padding(
-                top = Dimension.height(value = 1f).dp,
-                start = Dimension.height(value = 0.5f).dp
+                top = Dimension.height(value = 1f).dp, start = Dimension.height(value = 0.5f).dp
             )
             .padding(start = 10.dp, end = 10.dp),
         verticalArrangement = Arrangement.Center
@@ -102,12 +102,13 @@ fun LogInScreen(navController: NavController) {
             fontSize = 16.sp
         )
 
+
         OutlinedTextField(
             value = username.value,
             onValueChange = { username.value = it },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Enter username") }
-            //  colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
+            placeholder = { Text("Enter username") } ,
+            colors = TextFieldDefaults.outlinedTextFieldColors( focusedBorderColor = Color.Gray,unfocusedBorderColor = Color.Gray, cursorColor = Color.Black, backgroundColor = Color.White)
         )
 
         Spacer(modifier = Modifier.padding(bottom = Dimension.height(value = 1f).dp))
@@ -118,16 +119,21 @@ fun LogInScreen(navController: NavController) {
             // fontWeight = FontWeight.Bold,
             //  color = Color(R.color.textColor)
         )
-
         OutlinedTextField(
             value = password.value,
             onValueChange = { password.value = it },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Enter password") },
-            //  colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black),
+            placeholder = { Text("Enter password") } ,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            visualTransformation = PasswordVisualTransformation()
+            visualTransformation = PasswordVisualTransformation(),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.Gray,
+                unfocusedBorderColor = Color.Gray,
+                cursorColor = Color.Black,
+                backgroundColor = Color.White
+            )
         )
+
 
         Spacer(modifier = Modifier.padding(top = Dimension.height(value = 1.5f).dp))
 
@@ -255,7 +261,7 @@ fun LogInScreen(navController: NavController) {
 
                     LaunchedEffect(Unit) {
                         delay(200)
-                        navController.navigate("listofNotes/$Token/${username.value}/${password.value}")
+                        navController.navigate("listofNotes/$Token")
                     }
 
                 } else {

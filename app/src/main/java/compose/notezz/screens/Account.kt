@@ -2,7 +2,6 @@ package compose.notezz.screens
 
 import android.annotation.SuppressLint
 import android.widget.Toast
-import androidx.compose.foundation.ScrollState.Companion.Saver
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -22,23 +21,22 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
 import compose.notezz.R
 import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.AccountDetails
-import compose.notezz.model.UserEmail
 import compose.notezz.model.UserPreference
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.Response
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "WrongConstant","CoroutineCreationDuringComposition",
+
+@SuppressLint(
+    "UnusedMaterialScaffoldPaddingParameter", "WrongConstant", "CoroutineCreationDuringComposition",
     "SuspiciousIndentation"
 )
 @Composable
-fun Account(token: String,navController: NavController) {
+fun Account(token: String, navController: NavController) {
     val authViewModel: AuthenticationViewModel = hiltViewModel()
     val username = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
@@ -93,13 +91,10 @@ fun Account(token: String,navController: NavController) {
             text = "Update your account settings below.",
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
             fontSize = 16.sp,
-
-            // color = Color(R.color.textColor)
         )
         Text(
             text = "Email",
-            modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
-            // fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 5.dp, top = 8.dp)
 
         )
 
@@ -108,7 +103,12 @@ fun Account(token: String,navController: NavController) {
             value = email.value,
             onValueChange = { email.value = it },
             modifier = Modifier.fillMaxWidth(),
-            // colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.Gray,
+                unfocusedBorderColor = Color.Gray,
+                cursorColor = Color.Black,
+                backgroundColor = Color.White
+            )
 
         )
         Text(
@@ -127,8 +127,13 @@ fun Account(token: String,navController: NavController) {
             value = username.value,
             onValueChange = { username.value = it },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = {Text(username.value)}
-            //colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
+            placeholder = { Text(username.value) },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.Gray,
+                unfocusedBorderColor = Color.Gray,
+                cursorColor = Color.Black,
+                backgroundColor = Color.White
+            )
 
         )
 
@@ -145,7 +150,12 @@ fun Account(token: String,navController: NavController) {
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = PasswordVisualTransformation(),
-            // colors = TextFieldDefaults.textFieldColors(cursorColor = Color.Black)
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.Gray,
+                unfocusedBorderColor = Color.Gray,
+                cursorColor = Color.Black,
+                backgroundColor = Color.White
+            )
 
         )
         Spacer(modifier = Modifier.padding(bottom = 15.dp))
@@ -159,7 +169,13 @@ fun Account(token: String,navController: NavController) {
             value = confirmPassword.value,
             onValueChange = { confirmPassword.value = it },
             modifier = Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation()
+            visualTransformation = PasswordVisualTransformation(),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.Gray,
+                unfocusedBorderColor = Color.Gray,
+                cursorColor = Color.Black,
+                backgroundColor = Color.White
+            )
 
         )
 
@@ -168,8 +184,10 @@ fun Account(token: String,navController: NavController) {
 
         Button(
             colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray)),
-            onClick = { UpdateAccountStatus.value = true
-                focus.clearFocus()},
+            onClick = {
+                UpdateAccountStatus.value = true
+                focus.clearFocus()
+            },
 
             ) {
 
@@ -191,45 +209,51 @@ fun Account(token: String,navController: NavController) {
         if (UpdateAccountStatus.value == true) {
             if (username.value.isEmpty() && password.value.isEmpty()) {
                 val toast =
-                    Toast.makeText(LocalContext.current, "username and password cannot be empty.", Toast.LENGTH_SHORT)
-                toast.duration = 100
-                toast.show()
-            }else{
-            val updateResponseData: DataOrException<Response<Unit>, Boolean, Exception>
-            updateResponseData =
-                produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
-                    initialValue = DataOrException(
-                        loading = true
+                    Toast.makeText(
+                        LocalContext.current,
+                        "username and password cannot be empty.",
+                        Toast.LENGTH_SHORT
                     )
-                ) {
-                    value = authViewModel.updateAccount(
-                        "Bearer" + " " + token,
-
-                        AccountDetails(username.value, email.value, password.value)
-                    )
-                }.value
-
-            if (updateResponseData.loading == true) {
-                CircularProgressIndicator()
-            } else if (updateResponseData.data!!.code() == 201) {
-                val toast =
-                    Toast.makeText(LocalContext.current, "Account updated.", Toast.LENGTH_SHORT)
                 toast.duration = 100
                 toast.show()
                 UpdateAccountStatus.value = false
             } else {
-                val toast = Toast.makeText(
-                    LocalContext.current,
-                    updateResponseData.e?.message.toString(),
-                    Toast.LENGTH_SHORT
-                )
-                toast.duration = 100
-                toast.show()
+                val updateResponseData: DataOrException<Response<Unit>, Boolean, Exception>
+                updateResponseData =
+                    produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
+                        initialValue = DataOrException(
+                            loading = true
+                        )
+                    ) {
+                        value = authViewModel.updateAccount(
+                            "Bearer" + " " + token,
 
-                UpdateAccountStatus.value = false
+                            AccountDetails(username.value, email.value, password.value)
+                        )
+                    }.value
+
+                if (updateResponseData.loading == true) {
+                    CircularProgressIndicator()
+                } else if (updateResponseData.data!!.code() == 201) {
+                    val toast =
+                        Toast.makeText(LocalContext.current, "Account updated.", Toast.LENGTH_SHORT)
+                    toast.duration = 100
+                    toast.show()
+                    navController.navigate("updateAccount/$token")
+                    UpdateAccountStatus.value = false
+                } else {
+                    val toast = Toast.makeText(
+                        LocalContext.current,
+                        "Something went wrong.",
+                        Toast.LENGTH_SHORT
+                    )
+                    toast.duration = 100
+                    toast.show()
+
+                    UpdateAccountStatus.value = false
+                }
+
             }
-
-             }
         }
 
         Button(
@@ -272,7 +296,7 @@ fun Account(token: String,navController: NavController) {
                             },
 
                             ) {
-                            Text("Yes")
+                            Text("Yes", color = Color.Black)
 
                         }
                     },
@@ -281,7 +305,7 @@ fun Account(token: String,navController: NavController) {
                             stateOfAlertBox.value = false
                             DeleteAccountStatus.value = false
                         }) {
-                            Text("No")
+                            Text("No", color = Color.Black)
                         }
                     },
                     title = { Text("Are you sure? This is irreversible!") },
@@ -330,8 +354,6 @@ fun Account(token: String,navController: NavController) {
                         )
                         toast.duration = 100
                         toast.show()
-
-
                     }
                 }
             }
