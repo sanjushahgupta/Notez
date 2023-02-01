@@ -2,6 +2,7 @@ package compose.notezz.repository
 
 import android.provider.ContactsContract
 import android.provider.ContactsContract.Data
+import androidx.annotation.Keep
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import compose.notezz.dataorexception.DataOrException
@@ -9,6 +10,7 @@ import compose.notezz.model.*
 import compose.notezz.network.NotezzApi
 import retrofit2.Response
 import javax.inject.Inject
+
 
 class NotezzRepo @Inject constructor(val api: NotezzApi) {
 

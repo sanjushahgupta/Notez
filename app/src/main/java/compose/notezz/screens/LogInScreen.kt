@@ -251,12 +251,14 @@ fun LogInScreen(navController: NavController) {
                 if (logInResponseData.loading == true) {
                     CircularProgressIndicator()
 
-                } else if (logInResponseData.data!!.code() == 201) {
+                } else if (logInResponseData.data?.code() == 201) {
 
-                    val Token = logInResponseData.data!!.body()!!.token
+                    val Token = logInResponseData.data?.body()?.token
 
                     scope.launch {
-                        dataStore.saveLoginStatus(Token)
+                        if (Token != null) {
+                            dataStore.saveLoginStatus(Token)
+                        }
                     }
 
                     LaunchedEffect(Unit) {

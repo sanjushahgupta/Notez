@@ -41,6 +41,11 @@ fun WelcomeScreen(navController: NavController) {
     val scope = rememberCoroutineScope()
     val dataStore = UserPreference(context)
 
+    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally){
+        Image(painter = painterResource(id = compose.notezz.R.drawable.spalsh), contentDescription ="")
+    }
+
+
     scope.launch {
         dataStore.loginStatus.collect {
             val token = it.toString()
@@ -56,9 +61,7 @@ fun WelcomeScreen(navController: NavController) {
         }
     }
 
-    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally){
-        Image(painter = painterResource(id = compose.notezz.R.drawable.spalsh), contentDescription ="")
-    }
+
 
 
 
