@@ -26,12 +26,7 @@ fun AboutScreen (){
             modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
         ) {
 
-            Icon(
-                modifier = Modifier.padding(start = 10.dp),
-                tint = Color.Cyan,
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "logo"
-            )
+
             //  Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
         }
     }) {}

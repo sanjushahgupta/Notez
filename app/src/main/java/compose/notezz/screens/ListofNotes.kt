@@ -38,7 +38,7 @@ import retrofit2.Response
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
 @Composable
-fun HomeScreenListOfNotes(Token: String,navController: NavController) {
+fun HomeScreenListOfNotes(Token: String, navController: NavController) {
     val authViewModel: AuthenticationViewModel = hiltViewModel()
     var token = Token
     val context = LocalContext.current
@@ -195,8 +195,6 @@ fun ListItem(
                             null,
                             onClick = { navController.navigate("addNotes/$token/${item.title}/${item.body}/${item.id}/${item.status}/${item.created}/${item.created}/${item.userId}") })
                 ) {
-
-
                     var trimtitle = item.title
                     var trimbody = item.body
 
@@ -214,8 +212,7 @@ fun ListItem(
 
                         Spacer(Modifier.weight(1f))
 
-                        Icon(
-                            imageVector = Icons.Default.Delete,
+                        Icon(imageVector = Icons.Default.Delete,
                             contentDescription = "Delete",
                             modifier = Modifier
                                 .clickable { stateOfAlertBox.value = true }
@@ -223,7 +220,7 @@ fun ListItem(
                                 .wrapContentSize(),
                             tint = Color(0xFFFFC107)
 
-                            )
+                        )
                         if (stateOfAlertBox.value == true) {
                             AlertDialog(
                                 onDismissRequest = { stateOfAlertBox.value = false },

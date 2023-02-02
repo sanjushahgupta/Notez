@@ -12,6 +12,9 @@ import retrofit2.Response
 import javax.inject.Inject
 
 
+
+
+
 class NotezzRepo @Inject constructor(val api: NotezzApi) {
 
     suspend fun logIn(usernameandPassword: UsernameandPassword): DataOrException<Response<ResponseofSignUpAndLogIn>, Boolean, Exception> {
@@ -68,14 +71,14 @@ class NotezzRepo @Inject constructor(val api: NotezzApi) {
 
     }
 
-    suspend fun signUp(usernameandPassword: UsernameandPassword): DataOrException<Response<ResponseofSignUpAndLogIn>, Boolean, Exception>{
+    suspend fun signUp(usernameandPassword: UsernameandPassword): Response<ResponseofSignUpAndLogIn>{
 
-        val response = try{
-            api.signUp(usernameandPassword)
-        }catch (e: Exception){
-            return DataOrException(e = e)
-        }
-        return DataOrException(response)
+        val response = api.signUp(usernameandPassword)
+
+
+        return response
+
+
     }
 
     suspend fun forgotPassword(userEmail:  UserEmail):DataOrException<Response<Unit>, Boolean, Exception>{

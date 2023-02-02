@@ -251,7 +251,14 @@ fun LogInScreen(navController: NavController) {
                 if (logInResponseData.loading == true) {
                     CircularProgressIndicator()
 
-                } else if (logInResponseData.data?.code() == 201) {
+                } else if (logInResponseData.e?.equals(null) == false) {
+                    val exceptionMsg = logInResponseData.e!!.localizedMessage.toString()
+                    val toast = Toast.makeText(context, exceptionMsg, Toast.LENGTH_SHORT)
+                    toast.duration = 100
+                    toast.show()
+                    stateOfLoginButton.value = false
+
+            }else if (logInResponseData.data?.code() == 201) {
 
                     val Token = logInResponseData.data?.body()?.token
 

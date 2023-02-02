@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import retrofit2.Response
 import javax.inject.Inject
 
+@SuppressWarnings("unchecked")
 @HiltViewModel
 class AuthenticationViewModel @Inject constructor(val notezzRepo: NotezzRepo) : ViewModel() {
 
@@ -40,7 +41,7 @@ class AuthenticationViewModel @Inject constructor(val notezzRepo: NotezzRepo) : 
        return notezzRepo.updateNote(token,id,updateNoteRequest)
    }
 
-    suspend fun signUp(usernameandPassword: UsernameandPassword): DataOrException<Response<ResponseofSignUpAndLogIn>, Boolean, Exception>{
+    suspend fun signUp(usernameandPassword: UsernameandPassword): Response<ResponseofSignUpAndLogIn>{
         return notezzRepo.signUp(usernameandPassword)
     }
 

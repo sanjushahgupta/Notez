@@ -39,7 +39,6 @@ fun ForgotPassword(navController: NavController) {
         TopAppBar(
             modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
         ) {
-
             Icon(
                 modifier = Modifier.padding(start = 10.dp),
                 tint = colorResource(id = R.color.LogiTint),
@@ -62,7 +61,7 @@ fun ForgotPassword(navController: NavController) {
     ) {
 
         val emailID = remember { mutableStateOf("") }
-
+        val context = LocalContext.current
         Text(
             stringResource(R.string.RequestLoginLink),
             style = MaterialTheme.typography.h5,
@@ -100,6 +99,7 @@ fun ForgotPassword(navController: NavController) {
             Button(colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray)),
                 onClick = {
                     forgotButton.value = true
+                    focus.clearFocus()
                 }) {
 
                 Icon(
@@ -122,7 +122,7 @@ fun ForgotPassword(navController: NavController) {
 
             if (emailID.value.isEmpty()) {
                 val toast = Toast.makeText(
-                    LocalContext.current, "Please check your input.", Toast.LENGTH_SHORT
+                    context, "Please check your input.", Toast.LENGTH_SHORT
                 )
                 toast.duration = 100
                 toast.show()
@@ -138,6 +138,13 @@ fun ForgotPassword(navController: NavController) {
 
                 if (response.loading == true) {
                     CircularProgressIndicator()
+
+                } else if (response.e?.equals(null) == false) {
+                    val exceptionMsg = response.e!!.message.toString()
+                    val toast = Toast.makeText(context, exceptionMsg, Toast.LENGTH_SHORT)
+                    toast.duration = 100
+                    toast.show()
+                    forgotButton.value = false
 
                 } else if (response.data!!.code() == 201) {
                     val toast = Toast.makeText(

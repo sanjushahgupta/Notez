@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.navigation.NavController
+import compose.notezz.R
 import compose.notezz.model.UserPreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -41,9 +42,16 @@ fun WelcomeScreen(navController: NavController) {
     val scope = rememberCoroutineScope()
     val dataStore = UserPreference(context)
 
-    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally){
-        Image(painter = painterResource(id = compose.notezz.R.drawable.spalsh), contentDescription ="")
-    }
+    Column(
+        modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.splash),
+            contentDescription = ""
+        )
+
 
 
     scope.launch {
@@ -53,7 +61,7 @@ fun WelcomeScreen(navController: NavController) {
                 delay(500)
                 if (token.equals("loggedOut")) {
                     navController.navigate("logIn")
-                }else{
+                } else {
                     navController.navigate("listofNotes/$token")
                 }
             }.await()
@@ -61,7 +69,7 @@ fun WelcomeScreen(navController: NavController) {
         }
     }
 
-
+}
 
 
 
