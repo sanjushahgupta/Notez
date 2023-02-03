@@ -26,15 +26,29 @@ import androidx.navigation.NavController
 import compose.notezz.R
 import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.UserEmail
+import compose.notezz.model.UsernameandPassword
 import compose.notezz.util.Dimension
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import retrofit2.Response
 
-@SuppressLint("WrongConstant", "UnusedMaterialScaffoldPaddingParameter")
+@SuppressLint(
+    "SuspiciousIndentation",
+    "UnusedMaterialScaffoldPaddingParameter",
+    "CoroutineCreationDuringComposition",
+    "WrongConstant"
+)
+@OptIn(DelicateCoroutinesApi::class)
+
 @Composable
 fun ForgotPassword(navController: NavController) {
     val authViewModel: AuthenticationViewModel = hiltViewModel()
     val forgotButton = remember { mutableStateOf(false) }
+    val emailID = remember { mutableStateOf("") }
     val focus = LocalFocusManager.current
+    val context = LocalContext.current
     Scaffold(topBar = {
         TopAppBar(
             modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
@@ -60,8 +74,6 @@ fun ForgotPassword(navController: NavController) {
             .padding(start = 10.dp, end = 5.dp), verticalArrangement = Arrangement.Center
     ) {
 
-        val emailID = remember { mutableStateOf("") }
-        val context = LocalContext.current
         Text(
             stringResource(R.string.RequestLoginLink),
             style = MaterialTheme.typography.h5,
@@ -80,7 +92,8 @@ fun ForgotPassword(navController: NavController) {
             // color = Color.Black,
             fontWeight = FontWeight.Bold, modifier = Modifier.padding(8.dp)
         )
-        OutlinedTextField(value = emailID.value,
+        OutlinedTextField(
+            value = emailID.value,
             onValueChange = { emailID.value = it },
             placeholder = {
                 Text(
@@ -117,64 +130,6 @@ fun ForgotPassword(navController: NavController) {
                     .padding(10.dp)
                     .clickable { navController.navigate("logIn") })
         }
-
-        if (forgotButton.value == true) {
-
-            if (emailID.value.isEmpty()) {
-                val toast = Toast.makeText(
-                    context, "Please check your input.", Toast.LENGTH_SHORT
-                )
-                toast.duration = 100
-                toast.show()
-
-            } else {
-                val response = produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
-                    initialValue = DataOrException(
-                        loading = true
-                    )
-                ) {
-                    value = authViewModel.forgotPassword(UserEmail(emailID.value))
-                }.value
-
-                if (response.loading == true) {
-                    CircularProgressIndicator()
-
-                } else if (response.e?.equals(null) == false) {
-                    val exceptionMsg = response.e!!.message.toString()
-                    val toast = Toast.makeText(context, exceptionMsg, Toast.LENGTH_SHORT)
-                    toast.duration = 100
-                    toast.show()
-                    forgotButton.value = false
-
-                } else if (response.data!!.code() == 201) {
-                    val toast = Toast.makeText(
-                        LocalContext.current,
-                        "One time login link is sent to your registered email.",
-                        Toast.LENGTH_SHORT
-                    )
-                    toast.duration = 100
-                    toast.show()
-                    forgotButton.value = false
-
-                } else if (response.data!!.code() == 400) {
-
-                    val toast = Toast.makeText(
-                        LocalContext.current, "Please check your input.", Toast.LENGTH_SHORT
-                    )
-                    toast.duration = 100
-                    toast.show()
-                    forgotButton.value = false
-                } else {
-                    val toast = Toast.makeText(
-                        LocalContext.current, "Something went wrong.", Toast.LENGTH_SHORT
-                    )
-                    toast.duration = 100
-                    toast.show()
-                    forgotButton.value = false
-                }
-            }
-        }
-
         Column(
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -186,4 +141,66 @@ fun ForgotPassword(navController: NavController) {
             )
         }
     }
+
+    when {
+        forgotButton.value -> {
+
+            if (emailID.value.isEmpty()) {
+                val toast = Toast.makeText(
+                    context, "Please check your input.", Toast.LENGTH_SHORT
+                )
+                toast.duration = 100
+                toast.show()
+
+            } else {
+                val emailId = emailID.value
+                GlobalScope.launch(Dispatchers.Main) {
+                    try {
+                        val response = authViewModel.forgotPassword(UserEmail(emailId))
+                        val responseCode = response.code()
+                        if (responseCode == 201) {
+                            val toast = Toast.makeText(
+                                context,
+                                "One time login link is sent to your registered email.",
+                                Toast.LENGTH_SHORT
+                            )
+                            toast.duration = 100
+                            toast.show()
+                            forgotButton.value = false
+
+                        } else if (responseCode == 400) {
+
+                            val toast = Toast.makeText(
+                               context, "Please check your input.", Toast.LENGTH_SHORT
+                            )
+                            toast.duration = 100
+                            toast.show()
+                            forgotButton.value = false
+                        } else {
+                            val toast = Toast.makeText(
+                               context, responseCode, Toast.LENGTH_SHORT
+                            )
+                            toast.duration = 100
+                            toast.show()
+                            forgotButton.value = false
+                        }
+                    } catch (e: java.net.UnknownHostException) {
+                        Toast.makeText(
+                            context,
+                            "Please check your internet connection.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        forgotButton.value = false
+                    } catch (e: Exception) {
+                        val exceptionMsg = e!!.message.toString()
+                        val toast = Toast.makeText(context, exceptionMsg, Toast.LENGTH_SHORT)
+                        toast.duration = 100
+                        toast.show()
+                        forgotButton.value = false
+                    }
+                }
+            }
+        }
+    }
 }
+

@@ -17,13 +17,14 @@ import javax.inject.Inject
 
 class NotezzRepo @Inject constructor(val api: NotezzApi) {
 
-    suspend fun logIn(usernameandPassword: UsernameandPassword): DataOrException<Response<ResponseofSignUpAndLogIn>, Boolean, Exception> {
-        val response = try {
-            api.LogIn(usernameandPassword)
-        } catch (e: Exception) {
-            return DataOrException(e = e)
-        }
-        return DataOrException(data = response)
+    suspend fun signUp(usernameandPassword: UsernameandPassword): Response<ResponseofSignUpAndLogIn>{
+        val response = api.signUp(usernameandPassword)
+        return response
+    }
+
+    suspend fun logIn(usernameandPassword: UsernameandPassword): Response<ResponseofSignUpAndLogIn>{
+        val response = api.LogIn(usernameandPassword)
+        return response
     }
 
     suspend fun getNotes(token: String): DataOrException<Response<ArrayList<Note>>, Boolean, Exception> {
@@ -71,24 +72,13 @@ class NotezzRepo @Inject constructor(val api: NotezzApi) {
 
     }
 
-    suspend fun signUp(usernameandPassword: UsernameandPassword): Response<ResponseofSignUpAndLogIn>{
 
-        val response = api.signUp(usernameandPassword)
 
+    suspend fun forgotPassword(userEmail:  UserEmail):Response<Unit>{
+
+        val response = api.forgotPassword(userEmail)
 
         return response
-
-
-    }
-
-    suspend fun forgotPassword(userEmail:  UserEmail):DataOrException<Response<Unit>, Boolean, Exception>{
-
-        val response = try{
-            api.forgotPassword(userEmail)
-        }catch (e: Exception){
-            return DataOrException(e = e)
-        }
-        return DataOrException(response)
 
     }
 

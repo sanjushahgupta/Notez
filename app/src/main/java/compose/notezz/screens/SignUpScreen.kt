@@ -308,31 +308,36 @@ fun SignUpScreen(navController: NavController) {
                 }
                 else -> {
                     val usernameAndPassword = UsernameandPassword(username.value, password.value)
+
                     GlobalScope.launch(Dispatchers.Main) {
                         try {
-
                             val NotezzData = authViewModel.signUp(usernameAndPassword)
-                            val responseCode = NotezzData.code().toString()
-                            when (responseCode) {
-                                "201" -> {
-                                    val Token = NotezzData.body()!!.token
-                                    dataStore.saveLoginStatus(Token)
-                                    navController.navigate("listofNotes/$Token")
-                                    signUpButtton.value = false
-                                }
-                                "409" -> {
-                                    Toast.makeText(
-                                        context,
-                                        "Username already exists.",
-                                        Toast.LENGTH_SHORT
-                                    )
-                                        .show()
-                                    signUpButtton.value = false
-                                }
-                                else -> {
-                                    Toast.makeText(context, responseCode, Toast.LENGTH_SHORT).show()
-                                    signUpButtton.value = false
-                                }
+                        val responseCode = NotezzData.code().toString()
+
+                            if (responseCode == "201") {
+                                val Token = NotezzData.body()!!.token
+                                dataStore.saveLoginStatus(Token)
+                                navController.navigate("listofNotes/$Token")
+                                signUpButtton.value = false
+                            }
+                            else if (responseCode == "409") {
+                                Toast.makeText(
+                                    context,
+                                    responseCode,
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                                Toast.makeText(
+                                    context,
+                                    "Username already exists.",
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                                signUpButtton.value = false
+                            }
+                            else {
+                                Toast.makeText(context, responseCode, Toast.LENGTH_SHORT).show()
+                                signUpButtton.value = false
                             }
                         } catch (e: java.net.UnknownHostException) {
                             Toast.makeText(

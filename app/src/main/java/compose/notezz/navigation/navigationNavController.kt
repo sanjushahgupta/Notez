@@ -1,10 +1,13 @@
 package compose.notezz.navigation
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.painterResource
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import compose.notezz.R
 import compose.notezz.screens.*
 import kotlin.system.exitProcess
 

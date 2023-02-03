@@ -170,7 +170,7 @@ fun AddandEditScreen(
 
     val noteInfo = NoteInfo(title, body, status = "active")
 
-    if (addState.value == true) {
+    if (addState.value) {
         if (noteInfo.title.isEmpty() && noteInfo.body.isEmpty() || noteInfo.title.equals(" ") && noteInfo.body.equals(
                 " "
             )

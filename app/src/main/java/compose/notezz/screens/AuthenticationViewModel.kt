@@ -16,7 +16,10 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthenticationViewModel @Inject constructor(val notezzRepo: NotezzRepo) : ViewModel() {
 
-    suspend fun logIn(usernameandPasswordL: UsernameandPassword): DataOrException<Response<ResponseofSignUpAndLogIn>, Boolean, Exception> {
+    suspend fun signUp(usernameandPassword: UsernameandPassword): Response<ResponseofSignUpAndLogIn>{
+        return notezzRepo.signUp(usernameandPassword)
+    }
+    suspend fun logIn(usernameandPasswordL: UsernameandPassword): Response<ResponseofSignUpAndLogIn>{
         return notezzRepo.logIn(usernameandPasswordL)
     }
 
@@ -41,11 +44,9 @@ class AuthenticationViewModel @Inject constructor(val notezzRepo: NotezzRepo) : 
        return notezzRepo.updateNote(token,id,updateNoteRequest)
    }
 
-    suspend fun signUp(usernameandPassword: UsernameandPassword): Response<ResponseofSignUpAndLogIn>{
-        return notezzRepo.signUp(usernameandPassword)
-    }
 
-    suspend fun forgotPassword(userEmail:UserEmail):DataOrException<Response<Unit>, Boolean, Exception>{
+
+    suspend fun forgotPassword(userEmail:UserEmail):Response<Unit>{
         return notezzRepo.forgotPassword(userEmail)
     }
 

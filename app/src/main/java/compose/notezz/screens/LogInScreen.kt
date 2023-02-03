@@ -7,6 +7,9 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -27,10 +31,10 @@ import compose.notezz.model.ResponseofSignUpAndLogIn
 import compose.notezz.model.UserPreference
 import compose.notezz.model.UsernameandPassword
 import compose.notezz.util.Dimension
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import retrofit2.Response
 
+@OptIn(DelicateCoroutinesApi::class)
 @SuppressLint(
     "SuspiciousIndentation",
     "UnusedMaterialScaffoldPaddingParameter",
@@ -65,7 +69,7 @@ fun LogInScreen(navController: NavController) {
         }
     }) {}
 
-    var focus = LocalFocusManager.current
+    val focus = LocalFocusManager.current
     Column(
         modifier = Modifier
             .clickable(
@@ -116,16 +120,19 @@ fun LogInScreen(navController: NavController) {
             text = "Password",
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
             fontSize = 16.sp
-            // fontWeight = FontWeight.Bold,
-            //  color = Color(R.color.textColor)
         )
-        OutlinedTextField(
+        val passwordTxtVisibilityState = remember { mutableStateOf(false) }
+            OutlinedTextField(
             value = password.value,
             onValueChange = { password.value = it },
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text("Enter password") } ,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            visualTransformation = PasswordVisualTransformation(),
+            visualTransformation = if (passwordTxtVisibilityState.value) VisualTransformation.None else PasswordVisualTransformation() ,
+                trailingIcon = { val image = if(passwordTxtVisibilityState.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                      Icon(image, "hide/show", modifier = Modifier.clickable { passwordTxtVisibilityState.value = !passwordTxtVisibilityState.value })
+                               },
+
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = Color.Gray,
                 unfocusedBorderColor = Color.Gray,
@@ -205,7 +212,7 @@ fun LogInScreen(navController: NavController) {
         }
 
 
-        if (stateOfLoginButton.value == true) {
+        if (stateOfLoginButton.value) {
 
             val usernameandPassword = UsernameandPassword(username.value, password.value)
 
@@ -239,53 +246,64 @@ fun LogInScreen(navController: NavController) {
                 stateOfLoginButton.value = false
 
             } else {
-                val logInResponseData =
-                    produceState<DataOrException<Response<ResponseofSignUpAndLogIn>, Boolean, Exception>>(
-                        initialValue = DataOrException(
-                            loading = true
-                        )
-                    ) {
-                        value = authViewModel.logIn(usernameandPassword)
-                    }.value
-
-                if (logInResponseData.loading == true) {
-                    CircularProgressIndicator()
-
-                } else if (logInResponseData.e?.equals(null) == false) {
-                    val exceptionMsg = logInResponseData.e!!.localizedMessage.toString()
-                    val toast = Toast.makeText(context, exceptionMsg, Toast.LENGTH_SHORT)
-                    toast.duration = 100
-                    toast.show()
-                    stateOfLoginButton.value = false
-
-            }else if (logInResponseData.data?.code() == 201) {
-
-                    val Token = logInResponseData.data?.body()?.token
-
-                    scope.launch {
-                        if (Token != null) {
-                            dataStore.saveLoginStatus(Token)
-                        }
-                    }
-
-                    LaunchedEffect(Unit) {
-                        delay(200)
-                        navController.navigate("listofNotes/$Token")
-                    }
-
-                } else {
-                    // Text(text = "Exception:" + logInResponseData.data)
-                    val toast =
-                        Toast.makeText(
-                            LocalContext.current,
-                            "Invalid credentials",
-                            Toast.LENGTH_SHORT
-                        )
-                    toast.duration = 100
-                    toast.show()
-                    stateOfLoginButton.value = false
-
+                val loading = remember {
+                    mutableStateOf(true)
                 }
+
+                GlobalScope.launch(Dispatchers.Main){
+
+                    try{
+                        val logInResponseData = authViewModel.logIn(usernameandPassword)
+                        val responseCode = logInResponseData.code().toString()
+
+
+                        when (responseCode) {
+                            "401" -> {
+                                Toast.makeText(
+                                    context,
+                                    "Invalid Credentials.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                stateOfLoginButton.value = false
+                            }
+                            "201" -> {
+
+                                val toKen = logInResponseData.body()?.token
+
+                                if (toKen != null) {
+                                    dataStore.saveLoginStatus(toKen)
+                                }
+
+                                navController.navigate("listofNotes/$toKen")
+                                stateOfLoginButton.value = false
+
+                            }
+                            else -> {
+                                val toast = Toast.makeText(
+                                    context,"responseCode",
+                                    Toast.LENGTH_SHORT
+                                )
+                                toast.duration = 100
+                                toast.show()
+                                stateOfLoginButton.value = false
+                            }
+                        }
+
+                    }catch (e: java.net.UnknownHostException){
+                        val toast = Toast.makeText(context, "Please check your internet connection.", Toast.LENGTH_SHORT)
+                        toast.duration = 100
+                        toast.show()
+                        stateOfLoginButton.value = false
+                    }
+                    catch (e:Exception){
+                        val toast = Toast.makeText(context, "Unknown exception ", Toast.LENGTH_SHORT)
+                        toast.duration = 100
+                        toast.show()
+                        stateOfLoginButton.value = false
+                    }
+                }
+
+
             }
         }
     }
