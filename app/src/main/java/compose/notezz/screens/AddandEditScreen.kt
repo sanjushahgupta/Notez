@@ -1,6 +1,7 @@
 package compose.notezz.screens
 
 import android.annotation.SuppressLint
+import android.provider.Settings.Global
 import android.widget.Toast
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
@@ -25,11 +26,16 @@ import compose.notezz.model.Note
 import compose.notezz.model.NoteInfo
 import compose.notezz.model.updateNoteRequest
 import compose.notezz.util.Dimension
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import retrofit2.Response
 
 
 @OptIn(ExperimentalComposeUiApi::class)
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "WrongConstant", "SuspiciousIndentation")
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "WrongConstant", "SuspiciousIndentation",
+    "CoroutineCreationDuringComposition"
+)
 @Composable
 fun AddandEditScreen(
     token: String,
@@ -185,25 +191,55 @@ fun AddandEditScreen(
             addState.value = false
         } else {
             val context = LocalContext.current
-            val response = produceState<DataOrException<Response<Note>, Boolean, Exception>>(
-                initialValue = DataOrException(
-                    loading = true
+            GlobalScope.launch(Dispatchers.Main) {
+            try {
+                val response = authViewModel.addNote("Bearer" + " " + token, noteInfo)
+
+                val responseCode = response.code().toString()
+
+                when (responseCode) {
+                    "401" -> {
+                        Toast.makeText(
+                            context,
+                            "Invalid Credentials.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        addState.value = false
+                    }
+                    "201" -> {
+                        navController.navigate("listofNotes/$token")
+                        addState.value = false
+
+                    }
+                    else -> {
+                        val toast = Toast.makeText(
+                            context, responseCode,
+                            Toast.LENGTH_SHORT
+                        )
+                        toast.duration = 100
+                        toast.show()
+                        addState.value = false
+                    }
+                }
+
+            } catch (e: java.net.UnknownHostException) {
+                val toast = Toast.makeText(
+                    context,
+                    "Please check your internet connection.",
+                    Toast.LENGTH_SHORT
                 )
-            ) {
-                value = authViewModel.addNote("Bearer" + " " + token, noteInfo)
-            }.value
-            if (response.loading == true) {
-                CircularProgressIndicator()
-            } else if (response.data?.code() == 201) {
-                navController.navigate("listofNotes/$token")
+                toast.duration = 100
+                toast.show()
                 addState.value = false
-            } else {
-                val toast =
-                    Toast.makeText(context, response.e?.message.toString(), Toast.LENGTH_LONG)
+            } catch (e: Exception) {
+                val toast = Toast.makeText(context, "Unknown exception ", Toast.LENGTH_SHORT)
                 toast.duration = 100
                 toast.show()
                 addState.value = false
             }
+
+        }
+
         }
     }
 
@@ -226,29 +262,57 @@ fun AddandEditScreen(
             toast.duration = 100
             toast.show()
             updateState.value = false
-        }
-
-        val response = produceState<DataOrException<Response<Note>, Boolean, Exception>>(
-            initialValue = DataOrException(
-                loading = true
-            )
-        ) {
-            value = authViewModel.updateNote("Bearer" + " " + token, note_id, updateNote)
-        }.value
-
-        if (response.loading == true) {
-            CircularProgressIndicator()
-
-        } else if (response.data!!.code() == 200) {
-            navController.navigate("listofNotes/$token")
-            updateState.value = false
-
         } else {
-            val toast =
-                Toast.makeText(context, response.e!!.message.toString(), Toast.LENGTH_SHORT)
-            toast.duration = 100
-            toast.show()
-            updateState.value = false
+            val context = LocalContext.current
+            GlobalScope.launch(Dispatchers.Main) {
+                try {
+                    val response = authViewModel.updateNote("Bearer" + " " + token, note_id, updateNote)
+
+                    val responseCode = response.code().toString()
+
+                    when (responseCode) {
+                        "401" -> {
+                            Toast.makeText(
+                                context,
+                                "Invalid Credentials.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            updateState.value = false
+                        }
+                        "200" -> {
+                            navController.navigate("listofNotes/$token")
+                            updateState.value = false
+
+                        }
+                        else -> {
+                            val toast = Toast.makeText(
+                                context, responseCode,
+                                Toast.LENGTH_SHORT
+                            )
+                            toast.duration = 100
+                            toast.show()
+                            updateState.value = false
+                        }
+                    }
+
+                } catch (e: java.net.UnknownHostException) {
+                    val toast = Toast.makeText(
+                        context,
+                        "Please check your internet connection.",
+                        Toast.LENGTH_SHORT
+                    )
+                    toast.duration = 100
+                    toast.show()
+                    updateState.value = false
+                } catch (e: Exception) {
+                    val toast = Toast.makeText(context, "Unknown exception ", Toast.LENGTH_SHORT)
+                    toast.duration = 100
+                    toast.show()
+                    updateState.value = false
+                }
+
+            }
         }
+
     }
 }

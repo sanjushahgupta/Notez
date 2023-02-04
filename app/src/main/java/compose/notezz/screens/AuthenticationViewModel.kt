@@ -30,7 +30,7 @@ class AuthenticationViewModel @Inject constructor(val notezzRepo: NotezzRepo) : 
     suspend fun addNote(
         token: String,
         noteInfo: NoteInfo
-    ): DataOrException<Response<Note>, Boolean, Exception> {
+    ): Response<Note> {
         return notezzRepo.addNote(token, noteInfo)
     }
 
@@ -40,7 +40,7 @@ class AuthenticationViewModel @Inject constructor(val notezzRepo: NotezzRepo) : 
 
     }
 
-   suspend fun updateNote(token: String, id: Int, updateNoteRequest: updateNoteRequest): DataOrException<Response<Note>, Boolean, Exception>{
+   suspend fun updateNote(token: String, id: Int, updateNoteRequest: updateNoteRequest): Response<Note>{
        return notezzRepo.updateNote(token,id,updateNoteRequest)
    }
 

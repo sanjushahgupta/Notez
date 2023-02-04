@@ -1,13 +1,12 @@
 package compose.notezz.navigation
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import compose.notezz.R
 import compose.notezz.screens.*
 import kotlin.system.exitProcess
 
@@ -15,12 +14,12 @@ import kotlin.system.exitProcess
 
 fun navigationNavController() {
     val navController = rememberNavController()
-
+    val context = LocalContext.current
     NavHost(navController = navController, startDestination = "welcome") {
         composable("welcome") {
             WelcomeScreen(navController = navController)
             BackHandler() {
-                //
+
             }
         }
 
@@ -57,15 +56,29 @@ fun navigationNavController() {
                 it.arguments?.getString("userId")!!.toString(),
                 navController = navController
             )
+
         }
 
-        composable("forgotpassword/{email}"){
+        composable("forgotpassword/{email}") {
             ForgotPassword(navController = navController)
         }
 
-        composable("updateAccount/{token}"){
-            Account(it.arguments?.getString("token").toString(),
-                navController = navController)
+        composable("updateAccount/{token}") {
+            Account(
+                it.arguments?.getString("token").toString(),
+                navController = navController
+            )
+            BackHandler() {
+                if (!isInternetAvailable(context)) {
+                    Toast.makeText(
+                        context,
+                        "Please check your internet connection.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    navController.popBackStack()
+                }
+            }
         }
     }
 

@@ -36,15 +36,9 @@ class NotezzRepo @Inject constructor(val api: NotezzApi) {
         return DataOrException(response)
     }
 
-    suspend fun addNote(token: String, noteInfo: NoteInfo):DataOrException<Response<Note>, Boolean, Exception>{
-        val response = try{
-            api.addNotes(token, noteInfo)
-
-        }catch(e: Exception){
-            return DataOrException(e= e)
-
-        }
-        return DataOrException(response)
+    suspend fun addNote(token: String, noteInfo: NoteInfo):Response<Note>{
+        val response = api.addNotes(token, noteInfo)
+        return response
 
     }
 
@@ -60,15 +54,9 @@ class NotezzRepo @Inject constructor(val api: NotezzApi) {
 
     }
 
-    suspend fun updateNote(token: String, id:Int, updateNoteRequest: updateNoteRequest): DataOrException<Response<Note>, Boolean, Exception>{
-        val response = try{
-        api.updateNote(token, id,updateNoteRequest)
-
-        }catch(e: Exception){
-            return DataOrException(e= e)
-
-        }
-        return DataOrException(response)
+    suspend fun updateNote(token: String, id:Int, updateNoteRequest: updateNoteRequest): Response<Note>{
+        val response = api.updateNote(token, id,updateNoteRequest)
+        return response
 
     }
 

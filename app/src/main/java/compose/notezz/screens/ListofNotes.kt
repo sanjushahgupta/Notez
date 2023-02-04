@@ -1,7 +1,7 @@
 package compose.notezz.screens
 
 import android.annotation.SuppressLint
-import android.util.Log
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -30,6 +31,7 @@ import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.Note
 import compose.notezz.model.UserPreference
 import compose.notezz.util.Dimension
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -40,120 +42,222 @@ import retrofit2.Response
 @Composable
 fun HomeScreenListOfNotes(Token: String, navController: NavController) {
     val authViewModel: AuthenticationViewModel = hiltViewModel()
-    var token = Token
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val dataStore = UserPreference(context)
 
 
-    val notesResult = produceState<DataOrException<Response<ArrayList<Note>>, Boolean, Exception>>(
-        initialValue = DataOrException(loading = true)
-    ) {
-        value = authViewModel.getNotes("Bearer" + " " + token)
-    }.value
+    if (!isInternetAvailable(context)) {
+        ShowNoInternetToast(context)
+    } else {
+        val notesResult = getNoteResult(authViewModel, Token)
 
+        if (notesResult.loading == true) {
+            DisplayCircularProgress()
+        } else if (notesResult.data!!.code() != 200) {
+            CircularProgressIndicator()
+            CheckUserPreference(scope, dataStore, navController)
+        } else {
+            NotesListTopBar(navController, Token, scope, dataStore)
+            DisplayNotesListBody(navController, Token, notesResult, authViewModel)
+        }
+    }
+}
+
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@Composable
+private fun DisplayNotesListBody(
+    navController: NavController,
+    token: String,
+    notesResult: DataOrException<Response<ArrayList<Note>>, Boolean, Exception>,
+    authViewModel: AuthenticationViewModel
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                top = Dimension.height(value = 8f).dp,
+                start = Dimension.height(value = 0.5f).dp
+            ), verticalArrangement = Arrangement.Center
+    ) {
+        Scaffold(floatingActionButton = {
+            FloatingAddActionButton(navController, token)
+        }) {
+            DisplayNotes(notesResult, authViewModel, token, navController)
+        }
+
+    }
+}
+
+
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@Composable
+private fun NotesListTopBar(
+    navController: NavController,
+    token: String,
+    scope: CoroutineScope,
+    dataStore: UserPreference
+) {
+    Scaffold(topBar = {
+        TopAppBar(
+            modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
+
+        ) {
+            TopBarLogo()
+            Spacer(Modifier.weight(1f))
+            AccountSetting(navController, token)
+            Spacer(Modifier.padding(end = 15.dp))
+            LogoutIcon(scope, dataStore, navController)
+
+        }
+
+    }) {}
+}
+
+@Composable
+private fun DisplayCircularProgress() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .padding(start = 10.dp, end = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        CircularProgressIndicator(color = colorResource(id = R.color.LogiTint))
+    }
+}
+
+@Composable
+private fun AccountSetting(navController: NavController, token: String) {
+    Icon(
+        Icons.Default.Settings,
+        "",
+        modifier = Modifier
+            .padding(start = 10.dp, end = 8.dp)
+            .clickable { navController.navigate("updateAccount/$token") },
+        tint = Color.Gray
+    )
+}
+
+@Composable
+private fun FloatingAddActionButton(
+    navController: NavController,
+    token: String
+) {
+    val title = " "
+    val body = " "
+    FloatingActionButton(
+        onClick = {
+
+            navController.navigate("addNotes/$token/${title}/${body}/idis0/status/created/updated/userId")
+        }, backgroundColor = colorResource(id = R.color.LogiTint)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = "To add Notes",
+            tint = Color.White
+        )
+    }
+}
+
+@Composable
+private fun DisplayNotes(
+    notesResult: DataOrException<Response<ArrayList<Note>>, Boolean, Exception>,
+    authViewModel: AuthenticationViewModel,
+    token: String,
+    navController: NavController
+) {
     if (notesResult.loading == true) {
         CircularProgressIndicator()
 
-    } else if (notesResult.data!!.code() != 200) {
-        CircularProgressIndicator()
-        scope.launch {
-            dataStore.saveLoginStatus("loggedOut")
-            async {
-                delay(200)
-                navController.navigate("logIn")
-            }
-        }
+    } else if (notesResult.data!!.code() == 200) {
 
-    } else {
-        Scaffold(topBar = {
-            TopAppBar(
-                modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
-
-            ) {
-
-                Log.d("tokenFound", "Passed token: " + token)
-
-                Icon(
-                    modifier = Modifier.padding(start = 10.dp),
-                    tint = colorResource(id = R.color.LogiTint),
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "logo"
-                )
-                Spacer(Modifier.weight(1f))
-
-                Icon(
-                    Icons.Default.Settings,
-                    "",
-                    modifier = Modifier
-                        .padding(start = 10.dp, end = 8.dp)
-                        .clickable { navController.navigate("updateAccount/$token") },
-                    tint = Color.Gray
-                )
-                Spacer(Modifier.padding(end = 15.dp))
-                Icon(tint = Color.Gray,
-                    painter = painterResource(id = R.drawable.ic_baseline_logout_24),
-                    contentDescription = "logout",
-                    modifier = Modifier
-                        .padding(end = 6.dp)
-                        .clickable {
-                            scope.launch {
-                                dataStore.saveLoginStatus("loggedOut")
-                            }
-                            navController.navigate("logIn")
-                        })
-
-            }
-
-        }) {}
-        Column(
-
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    top = Dimension.height(value = 8f).dp, start = Dimension.height(value = 0.5f).dp
-                ), verticalArrangement = Arrangement.Center
-        ) {
-            Scaffold(floatingActionButton = {
-                var title = " "
-                var body = " "
-                FloatingActionButton(
-                    onClick = {
-
-                        navController.navigate("addNotes/$token/${title}/${body}/idis0/status/created/updated/userId")
-                    }, backgroundColor = colorResource(id = R.color.LogiTint)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "To add Notes",
-                        tint = Color.White
-                    )
-                }
-            }) {
-                if (notesResult.loading == true) {
-                    CircularProgressIndicator()
-
-                } else if (notesResult.data!!.code() == 200) {
-
-                    if (notesResult.data!!.body()!!.isEmpty()) {
+        if (notesResult.data!!.body()!!.isEmpty()) {
 
 
-                        Text(text = "No notes", fontWeight = FontWeight.Bold)
+            Text(text = "No notes", fontWeight = FontWeight.Bold)
 
 
-                    } else if (!notesResult.data!!.body()!!.isEmpty()) {
+        } else if (!notesResult.data!!.body()!!.isEmpty()) {
 
-                        ListItem(authViewModel, token, navController, notesResult.data!!.body()!!)
-
-                    }
-                }
-            }
-
+            ListItem(
+                authViewModel,
+                token,
+                navController,
+                notesResult.data!!.body()!!
+            )
 
         }
-
-
     }
+}
+
+@Composable
+private fun LogoutIcon(
+    scope: CoroutineScope,
+    dataStore: UserPreference,
+    navController: NavController
+) {
+    Icon(tint = Color.Gray,
+        painter = painterResource(id = R.drawable.ic_baseline_logout_24),
+        contentDescription = "logout",
+        modifier = Modifier
+            .padding(end = 6.dp)
+            .clickable {
+                scope.launch {
+                    dataStore.saveLoginStatus("loggedOut")
+                }
+                navController.navigate("logIn")
+            })
+}
+
+@Composable
+private fun TopBarLogo() {
+    Icon(
+        modifier = Modifier.padding(start = 10.dp),
+        tint = colorResource(id = R.color.LogiTint),
+        painter = painterResource(id = R.drawable.logo),
+        contentDescription = "logo"
+    )
+}
+
+@SuppressLint("CoroutineCreationDuringComposition")
+@Composable
+private fun CheckUserPreference(
+    scope: CoroutineScope,
+    dataStore: UserPreference,
+    navController: NavController
+) {
+    scope.launch {
+        dataStore.saveLoginStatus("loggedOut")
+        async {
+            delay(200)
+            navController.navigate("logIn")
+        }
+    }
+}
+
+@Composable
+private fun getNoteResult(
+    authViewModel: AuthenticationViewModel,
+    token: String
+): DataOrException<Response<ArrayList<Note>>, Boolean, Exception> {
+    val notesResult =
+        produceState<DataOrException<Response<ArrayList<Note>>, Boolean, Exception>>(
+            initialValue = DataOrException(loading = true)
+        ) {
+            value = authViewModel.getNotes("Bearer" + " " + token)
+        }.value
+    return notesResult
+}
+
+@Composable
+private fun ShowNoInternetToast(context: Context) {
+    Toast.makeText(
+        context,
+        "Please check your internet connection.",
+        Toast.LENGTH_SHORT
+    ).show()
 }
 
 
@@ -247,31 +351,47 @@ fun ListItem(
                         }
 
                         if (mutablestatetodelete.value) {
-                            val deleteResponseData =
-                                produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
-                                    initialValue = DataOrException(loading = true)
-                                ) {
-                                    value = authenticationViewModel.deleteNote(token, item.id)
-                                }.value
+                            val context = LocalContext.current
+                            if (!isInternetAvailable(context)) {
 
-                            if (deleteResponseData.loading == true) {
-                                CircularProgressIndicator()
-                            } else if (deleteResponseData.data!!.code() == 200) {
-                                navController.navigate("listofNotes/$token")
-                                mutablestatetodelete.value = false
-
-                            } else {
                                 val toast = Toast.makeText(
-                                    LocalContext.current, "Something went wrong", Toast.LENGTH_LONG
+                                    context, "Please check your internet.",
+                                    Toast.LENGTH_SHORT
                                 )
                                 toast.duration = 100
                                 toast.show()
-                                navController.navigate("listofNotes/$token")
                                 mutablestatetodelete.value = false
 
-                            }
-                        }
+                            } else {
 
+                                val deleteResponseData =
+                                    produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
+                                        initialValue = DataOrException(loading = true)
+                                    ) {
+                                        value = authenticationViewModel.deleteNote(token, item.id)
+                                    }.value
+
+                                if (deleteResponseData.loading == true) {
+                                    CircularProgressIndicator()
+                                } else if (deleteResponseData.data!!.code() == 200) {
+                                    navController.navigate("listofNotes/$token")
+                                    mutablestatetodelete.value = false
+
+                                } else {
+                                    val toast = Toast.makeText(
+                                        LocalContext.current,
+                                        "Something went wrong",
+                                        Toast.LENGTH_LONG
+                                    )
+                                    toast.duration = 100
+                                    toast.show()
+                                    navController.navigate("listofNotes/$token")
+                                    mutablestatetodelete.value = false
+
+                                }
+                            }
+
+                        }
                     }
                     if (trimbody.length > 40) {
                         trimbody = item.body.substring(0, 40) + ".."
@@ -283,7 +403,8 @@ fun ListItem(
                 }
 
             }
-
         }
+
     }
 }
+
