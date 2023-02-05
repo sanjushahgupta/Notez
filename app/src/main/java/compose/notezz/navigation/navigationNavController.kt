@@ -40,7 +40,7 @@ fun navigationNavController() {
                 navController = navController
             )
             BackHandler() {
-                //
+            exitProcess(1)
             }
         }
 

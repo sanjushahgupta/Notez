@@ -30,6 +30,7 @@ import compose.notezz.R
 import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.Note
 import compose.notezz.model.UserPreference
+import compose.notezz.navigation.navigationNavController
 import compose.notezz.util.Dimension
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -48,18 +49,18 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
 
 
     if (!isInternetAvailable(context)) {
-        ShowNoInternetToast(context)
+        ShowNoInternetToast(context, navController,Token)
     } else {
         val notesResult = getNoteResult(authViewModel, Token)
 
         if (notesResult.loading == true) {
             DisplayCircularProgress()
-        } else if (notesResult.data!!.code() != 200) {
-            CircularProgressIndicator()
-            CheckUserPreference(scope, dataStore, navController)
-        } else {
+        } else if (notesResult.data!!.code() == 200) {
             NotesListTopBar(navController, Token, scope, dataStore)
             DisplayNotesListBody(navController, Token, notesResult, authViewModel)
+        } else {
+            CircularProgressIndicator()
+            CheckUserPreference(scope, dataStore, navController)
         }
     }
 }
@@ -233,7 +234,7 @@ private fun CheckUserPreference(
         async {
             delay(200)
             navController.navigate("logIn")
-        }
+        }.await()
     }
 }
 
@@ -252,14 +253,26 @@ private fun getNoteResult(
 }
 
 @Composable
-private fun ShowNoInternetToast(context: Context) {
-    Toast.makeText(
-        context,
-        "Please check your internet connection.",
-        Toast.LENGTH_SHORT
-    ).show()
+private fun ShowNoInternetToast(context: Context, navController: NavController,Token: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, 
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()){
+        
+        Button(onClick = { navController.navigate("listofNotes/$Token")},
+            colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray))) {
+          Text(text = "Refresh", )
+        }
+        
+        Toast.makeText(
+            context,
+            "Please check your internet connection.",
+            Toast.LENGTH_SHORT
+        ).show()
+        
+    }
+   
 }
-
 
 @SuppressLint("UnrememberedMutableState", "WrongConstant")
 @Composable

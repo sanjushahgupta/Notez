@@ -27,9 +27,6 @@ import compose.notezz.model.UserPreference
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
-
-
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun WelcomeScreen(navController: NavController) {
