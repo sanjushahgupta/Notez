@@ -217,7 +217,18 @@ fun Account(token: String, navController: NavController) {
                 toast.duration = 100
                 toast.show()
                 UpdateAccountStatus.value = false
-            } else {
+            } else if(!isInternetAvailable(LocalContext.current)){
+                val toast =
+                    Toast.makeText(
+                        LocalContext.current,
+                        "Please check your internet connection.",
+                        Toast.LENGTH_SHORT
+                    )
+                toast.duration = 100
+                toast.show()
+                UpdateAccountStatus.value = false
+            }
+            else {
                 val updateResponseData: DataOrException<Response<Unit>, Boolean, Exception>
                 updateResponseData =
                     produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
@@ -313,53 +324,64 @@ fun Account(token: String, navController: NavController) {
 
             }
             if (deleteAlertBox.value == true) {
-                val responseData =
-                    produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
-                        initialValue = DataOrException(
-                            loading = true
-                        )
-                    ) {
-                        value = authViewModel.deleteAccount(
-                            "Bearer" + " " + token
-                        )
-                    }.value
-
-                when {
-                    responseData.loading == true -> {
-                        CircularProgressIndicator()
-                    }
-                    responseData.data!!.code() == 200 -> {
-                        val toast = Toast.makeText(
+                if (!isInternetAvailable(LocalContext.current)) {
+                    val toast =
+                        Toast.makeText(
                             LocalContext.current,
-                            "Account deleted",
+                            "Please check your internet connection.",
                             Toast.LENGTH_SHORT
                         )
-                        toast.duration = 100
-                        toast.show()
-                        scope.launch {
-                            async {
-                                dataStore.saveLoginStatus("loggedOut")
-                                delay(200)
-                                navController.navigate("login")
-                            }
+                    toast.duration = 100
+                    toast.show()
+                    UpdateAccountStatus.value = false
+                } else {
+                    val responseData =
+                        produceState<DataOrException<Response<Unit>, Boolean, Exception>>(
+                            initialValue = DataOrException(
+                                loading = true
+                            )
+                        ) {
+                            value = authViewModel.deleteAccount(
+                                "Bearer" + " " + token
+                            )
+                        }.value
+
+                    when {
+                        responseData.loading == true -> {
+                            CircularProgressIndicator()
                         }
-                        DeleteAccountStatus.value = false
+                        responseData.data!!.code() == 200 -> {
+                            val toast = Toast.makeText(
+                                LocalContext.current,
+                                "Account deleted",
+                                Toast.LENGTH_SHORT
+                            )
+                            toast.duration = 100
+                            toast.show()
+                            scope.launch {
+                                async {
+                                    dataStore.saveLoginStatus("loggedOut")
+                                    delay(200)
+                                    navController.navigate("login")
+                                }
+                            }
+                            DeleteAccountStatus.value = false
 
-                    }
-                    else -> {
-                        val toast = Toast.makeText(
-                            LocalContext.current,
-                            "something went wrong",
-                            Toast.LENGTH_SHORT
-                        )
-                        toast.duration = 100
-                        toast.show()
+                        }
+                        else -> {
+                            val toast = Toast.makeText(
+                                LocalContext.current,
+                                "something went wrong",
+                                Toast.LENGTH_SHORT
+                            )
+                            toast.duration = 100
+                            toast.show()
+                        }
                     }
                 }
+
             }
 
         }
-
-
     }
 }

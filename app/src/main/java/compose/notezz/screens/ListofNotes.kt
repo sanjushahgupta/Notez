@@ -30,7 +30,6 @@ import compose.notezz.R
 import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.Note
 import compose.notezz.model.UserPreference
-import compose.notezz.navigation.navigationNavController
 import compose.notezz.util.Dimension
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -49,7 +48,8 @@ fun HomeScreenListOfNotes(Token: String, navController: NavController) {
 
 
     if (!isInternetAvailable(context)) {
-        ShowNoInternetToast(context, navController,Token)
+        ShowNoInternetMessage(context, navController,Token)
+
     } else {
         val notesResult = getNoteResult(authViewModel, Token)
 
@@ -253,22 +253,16 @@ private fun getNoteResult(
 }
 
 @Composable
-private fun ShowNoInternetToast(context: Context, navController: NavController,Token: String) {
+private fun ShowNoInternetMessage(context: Context, navController: NavController, Token: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, 
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()){
-        
+        Text("OOPS! NO INTERNET CONNECTION.",color = Color.Gray)
         Button(onClick = { navController.navigate("listofNotes/$Token")},
-            colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray))) {
-          Text(text = "Refresh", )
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)) {
+          Text(text = "Try AGAIN" )
         }
-        
-        Toast.makeText(
-            context,
-            "Please check your internet connection.",
-            Toast.LENGTH_SHORT
-        ).show()
         
     }
    

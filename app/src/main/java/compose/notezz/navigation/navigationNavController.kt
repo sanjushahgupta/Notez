@@ -68,17 +68,7 @@ fun navigationNavController() {
                 it.arguments?.getString("token").toString(),
                 navController = navController
             )
-            BackHandler() {
-                if (!isInternetAvailable(context)) {
-                    Toast.makeText(
-                        context,
-                        "Please check your internet connection.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    navController.popBackStack()
-                }
-            }
+
         }
     }
 

@@ -193,7 +193,7 @@ fun ForgotPassword(navController: NavController) {
                         forgotButton.value = false
                     } catch (e: Exception) {
                         val exceptionMsg = e!!.message.toString()
-                        val toast = Toast.makeText(context, exceptionMsg, Toast.LENGTH_SHORT)
+                        val toast = Toast.makeText(context, "Something went wrong.", Toast.LENGTH_SHORT)
                         toast.duration = 100
                         toast.show()
                         forgotButton.value = false

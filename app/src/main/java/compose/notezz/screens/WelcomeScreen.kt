@@ -3,13 +3,15 @@
 package compose.notezz.screens
 
 import android.annotation.SuppressLint
-import android.app.Activity
+
 import android.content.Context
 import android.graphics.fonts.FontStyle
 import android.net.ConnectivityManager
+import android.net.ConnectivityManager.NetworkCallback
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -17,15 +19,19 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import compose.notezz.R
+import compose.notezz.model.ConnectionState
 import compose.notezz.model.UserPreference
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
@@ -48,8 +54,18 @@ fun WelcomeScreen(navController: NavController) {
         val scope = rememberCoroutineScope()
         val dataStore = UserPreference(context)
 
+
         if (!isInternetAvailable(context)) {
-            Text("Please check your internet connection.", fontWeight = FontWeight.Bold)
+            if (!isInternetAvailable(context)) {
+               Text("OOPS! NO INTERNET CONNECTION.",color = Color.Gray)
+
+                Button(onClick = { navController.navigate("welcome") },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)
+                ) {
+                    Text(text = "TRY AGAIN")
+                }
+
+            }
         } else {
             scope.launch {
                 dataStore.loginStatus.collect {
@@ -73,7 +89,10 @@ fun WelcomeScreen(navController: NavController) {
 }
 
 
- fun isInternetAvailable(context: Context): Boolean {
+
+
+
+fun isInternetAvailable(context: Context): Boolean {
     var result = false
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -99,6 +118,13 @@ fun WelcomeScreen(navController: NavController) {
     }
     return result
 }
+
+
+
+
+
+
+
 
 
 

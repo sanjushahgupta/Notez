@@ -13,7 +13,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -38,7 +40,7 @@ import compose.notezz.model.UsernameandPassword
 import compose.notezz.util.Dimension
 import kotlinx.coroutines.*
 
-@OptIn(DelicateCoroutinesApi::class)
+@OptIn(DelicateCoroutinesApi::class, ExperimentalComposeUiApi::class)
 @SuppressLint(
     "SuspiciousIndentation",
     "UnusedMaterialScaffoldPaddingParameter",
@@ -49,13 +51,13 @@ import kotlinx.coroutines.*
 @Composable
 fun SignUpScreen(navController: NavController) {
     val authViewModel: AuthenticationViewModel = hiltViewModel()
-    val username = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val confirmPassword = remember { mutableStateOf("") }
     val signUpButtton = remember { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val dataStore = UserPreference(context)
+    val username = remember { mutableStateOf("") }
 
     Scaffold(topBar = {
         TopAppBar(
@@ -104,10 +106,14 @@ fun SignUpScreen(navController: NavController) {
             modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
             fontSize = 16.sp
         )
+
         OutlinedTextField(
+
             value = username.value,
             onValueChange = { username.value = it },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .autofill(listOf(AutofillType.Username),
+                       onFill = {username.value = it}),
             placeholder = { Text("Enter Username") },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = Color.Gray,
@@ -133,7 +139,9 @@ fun SignUpScreen(navController: NavController) {
         OutlinedTextField(
             value = password.value,
             onValueChange = { password.value = it },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .autofill(listOf(AutofillType.Password),
+                onFill = {password.value = it}),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = if (passwordvisual.value) VisualTransformation.None else PasswordVisualTransformation(),
@@ -169,7 +177,9 @@ fun SignUpScreen(navController: NavController) {
         OutlinedTextField(
             value = confirmPassword.value,
             onValueChange = { confirmPassword.value = it },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .autofill(listOf(AutofillType.Password),
+                onFill = {confirmPassword.value = it}),
             visualTransformation = if (passwordConfirmvisual.value) VisualTransformation.None else PasswordVisualTransformation(),
             placeholder = { Text("Confirm password") },
             colors = TextFieldDefaults.outlinedTextFieldColors(

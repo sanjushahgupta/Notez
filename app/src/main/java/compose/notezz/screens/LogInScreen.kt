@@ -1,6 +1,7 @@
 package compose.notezz.screens
 
 import android.annotation.SuppressLint
+import android.view.Gravity
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -11,8 +12,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.AutofillNode
+import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.composed
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalAutofill
+import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
@@ -34,7 +44,7 @@ import compose.notezz.util.Dimension
 import kotlinx.coroutines.*
 import retrofit2.Response
 
-@OptIn(DelicateCoroutinesApi::class)
+@OptIn(DelicateCoroutinesApi::class, ExperimentalComposeUiApi::class)
 @SuppressLint(
     "SuspiciousIndentation",
     "UnusedMaterialScaffoldPaddingParameter",
@@ -48,7 +58,7 @@ fun LogInScreen(navController: NavController) {
     val authViewModel: AuthenticationViewModel = hiltViewModel()
     val username = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
-    var stateOfLoginButton = remember { mutableStateOf(false) }
+    val stateOfLoginButton = remember { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val dataStore = UserPreference(context)
@@ -106,11 +116,12 @@ fun LogInScreen(navController: NavController) {
             fontSize = 16.sp
         )
 
-
         OutlinedTextField(
             value = username.value,
             onValueChange = { username.value = it },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .autofill(listOf(AutofillType.Username),
+                    {username.value = it}),
             placeholder = { Text("Enter username") } ,
             colors = TextFieldDefaults.outlinedTextFieldColors( focusedBorderColor = Color.Gray,unfocusedBorderColor = Color.Gray, cursorColor = Color.Black, backgroundColor = Color.White)
         )
@@ -122,10 +133,14 @@ fun LogInScreen(navController: NavController) {
             fontSize = 16.sp
         )
         val passwordTxtVisibilityState = remember { mutableStateOf(false) }
-            OutlinedTextField(
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth().
+                autofill(
+                    autofillTypes = listOf(AutofillType.Password),
+                    onFill = { password.value = it },
+                ),
             value = password.value,
             onValueChange = { password.value = it },
-            modifier = Modifier.fillMaxWidth(),
             placeholder = { Text("Enter password") } ,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = if (passwordTxtVisibilityState.value) VisualTransformation.None else PasswordVisualTransformation() ,
@@ -225,6 +240,7 @@ fun LogInScreen(navController: NavController) {
                     )
                 toast.duration = 100
                 toast.show()
+
                 stateOfLoginButton.value = false
             } else if (username.value.length < 4) {
                 val toast = Toast.makeText(
@@ -304,6 +320,27 @@ fun LogInScreen(navController: NavController) {
                 }
 
 
+            }
+        }
+    }
+}
+@OptIn(ExperimentalComposeUiApi::class)
+fun Modifier.autofill(
+    autofillTypes: List<AutofillType>,
+    onFill: ((String) -> Unit),
+) = composed {
+    val autofill = LocalAutofill.current
+    val autofillNode = AutofillNode(onFill = onFill, autofillTypes = autofillTypes)
+    LocalAutofillTree.current += autofillNode
+
+    this.onGloballyPositioned {
+        autofillNode.boundingBox = it.boundsInWindow()
+    }.onFocusChanged { focusState ->
+        autofill?.run {
+            if (focusState.isFocused) {
+                requestAutofillForNode(autofillNode)
+            } else {
+                cancelAutofillForNode(autofillNode)
             }
         }
     }
