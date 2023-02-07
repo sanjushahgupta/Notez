@@ -353,7 +353,7 @@ fun ListItem(
                                         Text("No", color = Color.Black)
                                     }
                                 },
-                                title = { Text("Are you sure you want to delete this item?") },
+                                title = { TextView("Are you sure you want to delete this item?") },
                             )
                         }
 

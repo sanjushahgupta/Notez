@@ -127,7 +127,7 @@ fun Account(token: String, navController: NavController) {
             value = username.value,
             onValueChange = { username.value = it },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text(username.value) },
+            placeholder = { TextView(username.value) },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = Color.Gray,
                 unfocusedBorderColor = Color.Gray,
@@ -319,7 +319,7 @@ fun Account(token: String, navController: NavController) {
                             Text("No", color = Color.Black)
                         }
                     },
-                    title = { Text("Are you sure? This is irreversible!") },
+                    title = { TextView("Are you sure? This is irreversible!") },
                 )
 
             }

@@ -1,8 +1,6 @@
 package compose.notezz.screens
 
 import android.annotation.SuppressLint
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -59,21 +57,8 @@ fun SignUpScreen(navController: NavController) {
     val dataStore = UserPreference(context)
     val username = remember { mutableStateOf("") }
 
-    Scaffold(topBar = {
-        TopAppBar(
-            modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
-        ) {
 
-            Icon(
-                modifier = Modifier.padding(start = 10.dp),
-                tint = colorResource(id = R.color.LogiTint),
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "logo"
-            )
-            //  Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
-        }
-    }) {}
-
+    ScaffoldTopAppBar()
     val focus = LocalFocusManager.current
     Column(
         modifier = Modifier
@@ -111,10 +96,11 @@ fun SignUpScreen(navController: NavController) {
 
             value = username.value,
             onValueChange = { username.value = it },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .autofill(listOf(AutofillType.Username),
-                       onFill = {username.value = it}),
-            placeholder = { Text("Enter Username") },
+                    onFill = { username.value = it }),
+            placeholder = { TextView("Enter Username") },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = Color.Gray,
                 unfocusedBorderColor = Color.Gray,
@@ -124,12 +110,7 @@ fun SignUpScreen(navController: NavController) {
         )
 
         Spacer(modifier = Modifier.padding(bottom = Dimension.height(value = 1f).dp))
-
-        Text(
-            text = "Password",
-            fontSize = 16.sp,
-            modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
-        )
+        TextView("Password")
         val passwordvisual = remember {
             mutableStateOf(false)
         }
@@ -139,13 +120,14 @@ fun SignUpScreen(navController: NavController) {
         OutlinedTextField(
             value = password.value,
             onValueChange = { password.value = it },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .autofill(listOf(AutofillType.Password),
-                onFill = {password.value = it}),
+                    onFill = { password.value = it }),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = if (passwordvisual.value) VisualTransformation.None else PasswordVisualTransformation(),
-            placeholder = { Text("Enter password") },
+            placeholder = { TextView("Enter password") },
             trailingIcon = {
 
                 val imageForVisibility =
@@ -177,11 +159,12 @@ fun SignUpScreen(navController: NavController) {
         OutlinedTextField(
             value = confirmPassword.value,
             onValueChange = { confirmPassword.value = it },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .autofill(listOf(AutofillType.Password),
-                onFill = {confirmPassword.value = it}),
+                    onFill = { confirmPassword.value = it }),
             visualTransformation = if (passwordConfirmvisual.value) VisualTransformation.None else PasswordVisualTransformation(),
-            placeholder = { Text("Confirm password") },
+            placeholder = { TextView("Confirm password") },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = Color.Gray,
                 unfocusedBorderColor = Color.Gray,
@@ -237,14 +220,7 @@ fun SignUpScreen(navController: NavController) {
                 color = Color.White
             )
         }
-
-        Text(
-            "Already have an account?",
-            modifier = Modifier.padding(bottom = 5.dp, top = 5.dp),
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.h6,
-            // color = Color(R.color.textColor)
-        )
+        TextWithStyle("Already have an account?")
         Spacer(modifier = Modifier.padding(bottom = Dimension.height(value = 1f).dp))
         Divider()
         Spacer(modifier = Modifier.padding(bottom = Dimension.height(value = 1f).dp))
@@ -276,43 +252,20 @@ fun SignUpScreen(navController: NavController) {
         signUpButtton.value -> {
             when {
                 password.value.isEmpty() || confirmPassword.value.isEmpty() || username.value.isEmpty() -> {
-                    val toast =
-                        Toast.makeText(
-                            LocalContext.current,
-                            "Please fill out fields.",
-                            Toast.LENGTH_SHORT
-                        )
-                    toast.duration = 100
-                    toast.show()
+                    ComposableToastMessage("Please fill out fields.")
                     signUpButtton.value = false
                 }
                 username.value.length < 4 -> {
-                    val toast = Toast.makeText(
-                        context,
-                        "Length of a username must be of 4 characters or more.",
-                        Toast.LENGTH_SHORT
-                    )
-                    toast.duration = 100
-                    toast.show()
+                    ComposableToastMessage("Length of a username must be of 4 characters or more.")
                     signUpButtton.value = false
                 }
                 password.value.length < 6 -> {
-                    val toast = Toast.makeText(
-                        context,
-                        "Length of a password must be of 6 characters or more.",
-                        Toast.LENGTH_SHORT
-                    )
-                    toast.duration = 100
-                    toast.show()
+                    ComposableToastMessage("Length of a password must be of 6 characters or more")
                     signUpButtton.value = false
 
                 }
                 !password.value.equals(confirmPassword.value) -> {
-                    val toast = Toast.makeText(
-                        context, "Passwords do not match.", Toast.LENGTH_SHORT
-                    )
-                    toast.duration = 100
-                    toast.show()
+                    ComposableToastMessage("Passwords do not match.")
                     signUpButtton.value = false
 
                 }
@@ -331,35 +284,18 @@ fun SignUpScreen(navController: NavController) {
                                 signUpButtton.value = false
                             }
                             else if (responseCode == "409") {
-                                Toast.makeText(
-                                    context,
-                                    responseCode,
-                                    Toast.LENGTH_SHORT
-                                )
-                                    .show()
-                                Toast.makeText(
-                                    context,
-                                    "Username already exists.",
-                                    Toast.LENGTH_SHORT
-                                )
-                                    .show()
+                                toastMessage(context, "Username already exists.")
                                 signUpButtton.value = false
                             }
                             else {
-                                Toast.makeText(context, responseCode, Toast.LENGTH_SHORT).show()
+                                toastMessage(context, responseCode)
                                 signUpButtton.value = false
                             }
                         } catch (e: java.net.UnknownHostException) {
-                            Toast.makeText(
-                                context,
-                                "Please check your internet connection.",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            toastMessage(context, "Please check your internet connection.")
                             signUpButtton.value = false
                         } catch (e: Exception) {
-
-                            Log.d("unknown exception", e.toString())
-                            Toast.makeText(context, "Bad Request", Toast.LENGTH_SHORT).show()
+                            toastMessage(context, e.message.toString())
                             signUpButtton.value = false
                         }
                     }
