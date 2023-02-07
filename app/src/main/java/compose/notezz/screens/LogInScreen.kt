@@ -62,9 +62,19 @@ fun LogInScreen(navController: NavController) {
     val focus = LocalFocusManager.current
     val passwordTxtVisibilityState = remember { mutableStateOf(false) }
 
-    ScaffoldTopAppBar()
+    Scaffold(topBar = {
+        TopAppBar(
+            modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
+        ) {
 
-
+            Icon(
+                modifier = Modifier.padding(start = 10.dp),
+                tint = colorResource(id = R.color.LogiTint),
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "logo"
+            )
+        }
+    }) {}
     Column(
         modifier = Modifier
             .clickable(
@@ -100,22 +110,21 @@ fun LogInScreen(navController: NavController) {
         if (stateOfLoginButton.value) {
             val usernameandPassword = UsernameandPassword(username.value, password.value)
             if (password.value.isEmpty() || username.value.isEmpty()) {
-                ComposableToastMessage("Please fill out fields.")
-                stateOfLoginButton.value = false
+                ComposableToastMessage("Please fill out fields.", stateOfLoginButton)
             } else if (username.value.length < 4) {
-                ComposableToastMessage("Length of a username must be of 4 characters or more.")
-                stateOfLoginButton.value = false
+                ComposableToastMessage("Length of a username must be of 4 characters or more.", stateOfLoginButton)
+
             } else if (password.value.length < 6) {
-                ComposableToastMessage("Length of a password must be of 6 characters or more")
-                stateOfLoginButton.value = false
+                ComposableToastMessage("Length of a password must be of 6 characters or more", stateOfLoginButton)
+
             } else {
                 GlobalScope.launch(Dispatchers.Main) {
                     try {
                         val logInResponseData = authViewModel.logIn(usernameandPassword)
                         when (val responseCode = logInResponseData.code().toString()) {
                             "401" -> {
-                                toastMessage(context, "Invalid Credentials.")
-                                stateOfLoginButton.value = false
+                                toastMessage(context, "Invalid Credentials.", stateOfLoginButton)
+
                             }
                             "201" -> {
 
@@ -123,22 +132,22 @@ fun LogInScreen(navController: NavController) {
                                 if (toKen != null) {
                                     dataStore.saveLoginStatus(toKen)
                                 }
-                                navController.navigate("listofNotes/$toKen")
+                                navController.navigate("listOfNotes/$toKen")
                                 stateOfLoginButton.value = false
 
                             }
                             else -> {
-                                toastMessage(context, responseCode)
-                                stateOfLoginButton.value = false
+                                toastMessage(context, responseCode,stateOfLoginButton)
+
                             }
                         }
 
                     } catch (e: java.net.UnknownHostException) {
-                        toastMessage(context, "Please check your internet connection.")
-                        stateOfLoginButton.value = false
+                        toastMessage(context, "Please check your internet connection.", stateOfLoginButton)
+
                     } catch (e: Exception) {
-                        toastMessage(context, "Unknown exception ")
-                        stateOfLoginButton.value = false
+                        toastMessage(context, "Unknown exception", stateOfLoginButton)
+
                     }
                 }
 
@@ -190,7 +199,7 @@ fun TextView(msg: String) {
 
 @SuppressLint("WrongConstant")
 @Composable
-fun ComposableToastMessage(msg: String) {
+fun ComposableToastMessage(msg: String, btnState:MutableState<Boolean>) {
     val toast =
         Toast.makeText(
             LocalContext.current,
@@ -199,10 +208,11 @@ fun ComposableToastMessage(msg: String) {
         )
     toast.duration = 100
     toast.show()
+    btnState.value = false
 }
 
 @SuppressLint("WrongConstant")
-fun toastMessage(context: Context, msg: String) {
+fun toastMessage(context: Context, msg: String, btnState: MutableState<Boolean>) {
     val toast =
         Toast.makeText(
             context,
@@ -211,6 +221,7 @@ fun toastMessage(context: Context, msg: String) {
         )
     toast.duration = 100
     toast.show()
+    btnState.value = false
 }
 
 
@@ -220,7 +231,7 @@ fun NavigateToForgotPasswordScreen(navController: NavController) {
         "Forgot Password?",
         fontWeight = FontWeight.Bold,
         color = colorResource(id = R.color.blueish),
-        modifier = Modifier.clickable { navController.navigate("forgotpassword/email") }
+        modifier = Modifier.clickable { navController.navigate("forgotPassword/email") }
     )
 }
 
@@ -235,7 +246,6 @@ fun NavigateToSignUpScreen(
             focus.clearFocus()
         },
         colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray))
-        //  colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue)
     ) {
         Icon(
             tint = Color.White,
@@ -344,7 +354,7 @@ fun UsernameOutlinedTextField(username: MutableState<String>) {
 fun ScaffoldTopAppBar() {
     Scaffold(topBar = {
         TopAppBar(
-            modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
+            modifier = Modifier.fillMaxWidth(), backgroundColor = colorResource(id = R.color.lightGray)
         ) {
 
             Icon(

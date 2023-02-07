@@ -3,6 +3,7 @@ package compose.notezz.screens
 import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -177,7 +178,7 @@ private fun DisplayNotes(
         if (notesResult.data!!.body()!!.isEmpty()) {
 
 
-            Text(text = "No notes", fontWeight = FontWeight.Bold)
+            Text(text = "No notes.", modifier = Modifier.padding(10.dp))
 
 
         } else if (!notesResult.data!!.body()!!.isEmpty()) {
@@ -254,14 +255,24 @@ private fun getNoteResult(
 
 @Composable
 private fun ShowNoInternetMessage(context: Context, navController: NavController, Token: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Top,
+        modifier = Modifier
+            .padding(top = 30.dp)
+            .fillMaxWidth()
+            .fillMaxHeight()) {
+        Image(
+            painter = painterResource(id = R.drawable.ic_launcher_forground),
+            contentDescription = ""
+        )
+    }
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, 
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()){
-        Text("OOPS! NO INTERNET CONNECTION.",color = Color.Gray)
+        Text("Please check your internet connection.", fontSize = 16.sp, color = Color.Gray, modifier = Modifier.padding(top = 8.dp, bottom = 5.dp))
         Button(onClick = { navController.navigate("listofNotes/$Token")},
             colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)) {
-          Text(text = "Try AGAIN" )
+          Text(text = "TRY AGAIN" )
         }
         
     }
@@ -327,7 +338,7 @@ fun ListItem(
                             contentDescription = "Delete",
                             modifier = Modifier
                                 .clickable { stateOfAlertBox.value = true }
-                                .padding(end = 6.dp)
+                                .padding(end = 6.dp,top = 8.dp)
                                 .wrapContentSize(),
                             tint = Color(0xFFFFC107)
 
@@ -362,7 +373,7 @@ fun ListItem(
                             if (!isInternetAvailable(context)) {
 
                                 val toast = Toast.makeText(
-                                    context, "Please check your internet.",
+                                    context, "Please check your internet connection.",
                                     Toast.LENGTH_SHORT
                                 )
                                 toast.duration = 100
@@ -379,7 +390,7 @@ fun ListItem(
                                     }.value
 
                                 if (deleteResponseData.loading == true) {
-                                    CircularProgressIndicator()
+                                    CircularProgressIndicator(color = colorResource(id = R.color.LogiTint))
                                 } else if (deleteResponseData.data!!.code() == 200) {
                                     navController.navigate("listofNotes/$token")
                                     mutablestatetodelete.value = false

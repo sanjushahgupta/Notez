@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -48,18 +49,32 @@ import kotlinx.coroutines.*
 
 @Composable
 fun SignUpScreen(navController: NavController) {
+
     val authViewModel: AuthenticationViewModel = hiltViewModel()
+    val username = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val confirmPassword = remember { mutableStateOf("") }
-    val signUpButtton = remember { mutableStateOf(false) }
+    val signUpBtnState = remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val focus = LocalFocusManager.current
     val scope = rememberCoroutineScope()
     val dataStore = UserPreference(context)
-    val username = remember { mutableStateOf("") }
 
+    Scaffold(topBar = {
+        TopAppBar(
+            modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
+        ) {
 
-    ScaffoldTopAppBar()
-    val focus = LocalFocusManager.current
+            Icon(
+                modifier = Modifier.padding(start = 10.dp),
+                tint = colorResource(id = R.color.LogiTint),
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "logo"
+            )
+            // Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
+        }
+    }) {}
+
     Column(
         modifier = Modifier
             .clickable(MutableInteractionSource(),
@@ -72,201 +87,45 @@ fun SignUpScreen(navController: NavController) {
             .padding(start = 10.dp, end = 10.dp), verticalArrangement = Arrangement.Center
     ) {
 
-        Text(
-            text = "Register",
-            style = MaterialTheme.typography.h5,
-            color = Color.Black,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 15.dp, top = 59.dp)
-        )
-        Divider()
-        Text(
-            text = "Register below and start taking notes in seconds.",
-            modifier = Modifier.padding(bottom = 5.dp, top = Dimension.height(value = 0.8f).dp),
-            fontSize = 16.sp,
-        )
-
-        Text(
-            text = "Username",
-            modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
-            fontSize = 16.sp
-        )
-
-        OutlinedTextField(
-
-            value = username.value,
-            onValueChange = { username.value = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .autofill(listOf(AutofillType.Username),
-                    onFill = { username.value = it }),
-            placeholder = { TextView("Enter Username") },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = Color.Gray,
-                unfocusedBorderColor = Color.Gray,
-                cursorColor = Color.Black,
-                backgroundColor = Color.White
-            )
-        )
-
+        SignUpIntro()
+        UsernameTextField(username)
         Spacer(modifier = Modifier.padding(bottom = Dimension.height(value = 1f).dp))
-        TextView("Password")
-        val passwordvisual = remember {
-            mutableStateOf(false)
-        }
-        val passwordConfirmvisual = remember {
-            mutableStateOf(false)
-        }
-        OutlinedTextField(
-            value = password.value,
-            onValueChange = { password.value = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .autofill(listOf(AutofillType.Password),
-                    onFill = { password.value = it }),
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            visualTransformation = if (passwordvisual.value) VisualTransformation.None else PasswordVisualTransformation(),
-            placeholder = { TextView("Enter password") },
-            trailingIcon = {
-
-                val imageForVisibility =
-                    if (passwordvisual.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-
-                Icon(imageForVisibility, "showOrHide", modifier = Modifier.clickable {
-
-                    passwordvisual.value = !passwordvisual.value
-
-                })
-            },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = Color.Gray,
-                unfocusedBorderColor = Color.Gray,
-                cursorColor = Color.Black,
-                backgroundColor = Color.White
-            ),
-
-            )
-
+        PasswordTextField(password)
         Spacer(modifier = Modifier.padding(top = Dimension.height(value = 1f).dp))
-        Text(
-            fontSize = 16.sp,
-            text = "Password confirmation",
-            modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
-            //  color = Color(R.color.textColor)
-        )
-
-        OutlinedTextField(
-            value = confirmPassword.value,
-            onValueChange = { confirmPassword.value = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .autofill(listOf(AutofillType.Password),
-                    onFill = { confirmPassword.value = it }),
-            visualTransformation = if (passwordConfirmvisual.value) VisualTransformation.None else PasswordVisualTransformation(),
-            placeholder = { TextView("Confirm password") },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = Color.Gray,
-                unfocusedBorderColor = Color.Gray,
-                cursorColor = Color.Black,
-                backgroundColor = Color.White
-            ),
-            trailingIcon = {
-
-                val imageForVisibility =
-                    if (passwordConfirmvisual.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-
-                Icon(imageForVisibility, "showOrHide", modifier = Modifier.clickable {
-
-                    passwordConfirmvisual.value = !passwordConfirmvisual.value
-
-                })
-            }
-        )
-
+        PasswordConfirmationTxtField(confirmPassword)
         Spacer(modifier = Modifier.padding(top = 15.dp))
-        HyperlinkText(
-            fullText = "By registering, you agree to our " + "Terms and Conditions and Privacy Policy.",
-
-            hyperLinks = mutableMapOf(
-                "Terms and Conditions" to "https://notezz.com/terms",
-                "Privacy Policy" to "https://notezz.com/privacy"
-            ), textStyle = TextStyle(
-                //  textAlign = TextAlign.Start,
-                color = colorResource(id = R.color.lightGray)
-            ), linkTextColor = colorResource(id = R.color.blueish), fontSize = 15.sp
-        )
+        LinkToTermsAndPolicy()
         Spacer(modifier = Modifier.padding(bottom = 12.dp))
-
-        Button(
-            onClick = {
-                signUpButtton.value = true
-                focus.clearFocus()
-            },
-            colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray))
-        ) {
-
-
-            Icon(
-                tint = Color.White,
-                painter = painterResource(id = R.drawable.ic_baseline_person_24),
-                contentDescription = ""
-            )
-            Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-            Text(
-                text = "Register",
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                color = Color.White
-            )
-        }
+        RegisterUserButton(signUpBtnState, focus)
         TextWithStyle("Already have an account?")
         Spacer(modifier = Modifier.padding(bottom = Dimension.height(value = 1f).dp))
         Divider()
         Spacer(modifier = Modifier.padding(bottom = Dimension.height(value = 1f).dp))
-
-        Button(
-            onClick = {
-                navController.navigate("login")
-                focus.clearFocus()
-            },
-            colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray))
-
-        ) {
-            Icon(
-                tint = Color.White,
-                painter = painterResource(id = R.drawable.ic_baseline_login_24),
-                contentDescription = "",
-
-                )
-            Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-            Text(
-                "Login", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.White
-            )
-        }
+        NavigateToLoginScreen(navController, focus)
         Spacer(modifier = Modifier.padding(bottom = 8.dp))
     }
 
 
     when {
-        signUpButtton.value -> {
+        signUpBtnState.value -> {
             when {
                 password.value.isEmpty() || confirmPassword.value.isEmpty() || username.value.isEmpty() -> {
-                    ComposableToastMessage("Please fill out fields.")
-                    signUpButtton.value = false
+                    ComposableToastMessage("Please fill out fields.", signUpBtnState)
                 }
                 username.value.length < 4 -> {
-                    ComposableToastMessage("Length of a username must be of 4 characters or more.")
-                    signUpButtton.value = false
+                    ComposableToastMessage(
+                        "Length of a username must be of 4 characters or more.",
+                        signUpBtnState
+                    )
                 }
                 password.value.length < 6 -> {
-                    ComposableToastMessage("Length of a password must be of 6 characters or more")
-                    signUpButtton.value = false
-
+                    ComposableToastMessage(
+                        "Length of a password must be of 6 characters or more",
+                        signUpBtnState
+                    )
                 }
-                !password.value.equals(confirmPassword.value) -> {
-                    ComposableToastMessage("Passwords do not match.")
-                    signUpButtton.value = false
+                password.value != confirmPassword.value -> {
+                    ComposableToastMessage("Passwords do not match.", signUpBtnState)
 
                 }
                 else -> {
@@ -274,35 +133,239 @@ fun SignUpScreen(navController: NavController) {
 
                     GlobalScope.launch(Dispatchers.Main) {
                         try {
-                            val NotezzData = authViewModel.signUp(usernameAndPassword)
-                        val responseCode = NotezzData.code().toString()
+                            val signUpResponse = authViewModel.signUp(usernameAndPassword)
+                            when (val responseCode = signUpResponse.code().toString()) {
+                                "201" -> {
+                                    val tokEn = signUpResponse.body()!!.token
+                                    dataStore.saveLoginStatus(tokEn)
+                                    navController.navigate("listOfNotes/$tokEn")
+                                    signUpBtnState.value = false
+                                }
+                                "409" -> {
+                                    toastMessage(
+                                        context,
+                                        "Username already exists.",
+                                        signUpBtnState
+                                    )
 
-                            if (responseCode == "201") {
-                                val Token = NotezzData.body()!!.token
-                                dataStore.saveLoginStatus(Token)
-                                navController.navigate("listofNotes/$Token")
-                                signUpButtton.value = false
-                            }
-                            else if (responseCode == "409") {
-                                toastMessage(context, "Username already exists.")
-                                signUpButtton.value = false
-                            }
-                            else {
-                                toastMessage(context, responseCode)
-                                signUpButtton.value = false
+                                }
+                                else -> {
+                                    toastMessage(context, responseCode, signUpBtnState)
+
+                                }
                             }
                         } catch (e: java.net.UnknownHostException) {
-                            toastMessage(context, "Please check your internet connection.")
-                            signUpButtton.value = false
+                            toastMessage(
+                                context,
+                                "Please check your internet connection.",
+                                signUpBtnState
+                            )
+
                         } catch (e: Exception) {
-                            toastMessage(context, e.message.toString())
-                            signUpButtton.value = false
+                            toastMessage(context, e.message.toString(), signUpBtnState)
+
                         }
                     }
                 }
             }
         }
     }
+}
+
+
+@Composable
+private fun LinkToTermsAndPolicy() {
+    HyperlinkText(
+        fullText = "By registering, you agree to our " + "Terms and Conditions and Privacy Policy.",
+
+        hyperLinks = mutableMapOf(
+            "Terms and Conditions" to "https://notezz.com/terms",
+            "Privacy Policy" to "https://notezz.com/privacy"
+        ), textStyle = TextStyle(
+            //  textAlign = TextAlign.Start,
+            color = colorResource(id = R.color.lightGray)
+        ), linkTextColor = colorResource(id = R.color.blueish), fontSize = 15.sp
+    )
+}
+
+@Composable
+private fun NavigateToLoginScreen(
+    navController: NavController,
+    focus: FocusManager
+) {
+    Button(
+        onClick = {
+            navController.navigate("login")
+            focus.clearFocus()
+        },
+        colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray))
+
+    ) {
+        Icon(
+            tint = Color.White,
+            painter = painterResource(id = R.drawable.ic_baseline_login_24),
+            contentDescription = "",
+
+            )
+        Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
+        Text(
+            "Login", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.White
+        )
+    }
+}
+
+@Composable
+private fun RegisterUserButton(
+    signUpButtonState: MutableState<Boolean>,
+    focus: FocusManager
+) {
+    Button(
+        onClick = {
+            signUpButtonState.value = true
+            focus.clearFocus()
+        },
+        colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray))
+    ) {
+
+
+        Icon(
+            tint = Color.White,
+            painter = painterResource(id = R.drawable.ic_baseline_person_24),
+            contentDescription = ""
+        )
+        Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
+        Text(
+            text = "Register",
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp,
+            color = Color.White
+        )
+    }
+}
+
+@Composable
+@OptIn(ExperimentalComposeUiApi::class)
+private fun PasswordConfirmationTxtField(confirmPassword: MutableState<String>) {
+    Text(
+        fontSize = 16.sp,
+        text = "Password confirmation",
+        modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
+        //  color = Color(R.color.textColor)
+    )
+    val passwordConfirmVisual = remember {
+        mutableStateOf(false)
+    }
+    OutlinedTextField(
+        value = confirmPassword.value,
+        onValueChange = { confirmPassword.value = it },
+        modifier = Modifier
+            .fillMaxWidth()
+            .autofill(listOf(AutofillType.Password),
+                onFill = { confirmPassword.value = it }),
+        visualTransformation = if (passwordConfirmVisual.value) VisualTransformation.None else PasswordVisualTransformation(),
+        placeholder = { Text("Confirm password") },
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor = Color.Gray,
+            unfocusedBorderColor = Color.Gray,
+            cursorColor = Color.Black,
+            backgroundColor = Color.White
+        ),
+        trailingIcon = {
+
+            val imageForVisibility =
+                if (passwordConfirmVisual.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+
+            Icon(imageForVisibility, "showOrHide", modifier = Modifier.clickable {
+
+                passwordConfirmVisual.value = !passwordConfirmVisual.value
+
+            })
+        }
+    )
+}
+
+@Composable
+@OptIn(ExperimentalComposeUiApi::class)
+fun PasswordTextField(password: MutableState<String>) {
+    TextView("Password")
+    val passwordVisual = remember {
+        mutableStateOf(false)
+    }
+
+    OutlinedTextField(
+        value = password.value,
+        onValueChange = { password.value = it },
+        modifier = Modifier
+            .fillMaxWidth()
+            .autofill(listOf(AutofillType.Password),
+                onFill = { password.value = it }),
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        visualTransformation = if (passwordVisual.value) VisualTransformation.None else PasswordVisualTransformation(),
+        placeholder = { Text("Enter password") },
+        trailingIcon = {
+
+            val imageForVisibility =
+                if (passwordVisual.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+
+            Icon(imageForVisibility, "showOrHide", modifier = Modifier.clickable {
+
+                passwordVisual.value = !passwordVisual.value
+
+            })
+        },
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor = Color.Gray,
+            unfocusedBorderColor = Color.Gray,
+            cursorColor = Color.Black,
+            backgroundColor = Color.White
+        ),
+
+        )
+}
+
+@Composable
+@OptIn(ExperimentalComposeUiApi::class)
+fun UsernameTextField(username: MutableState<String>) {
+    Text(
+        text = "Username",
+        modifier = Modifier.padding(bottom = 5.dp, top = 8.dp),
+        fontSize = 16.sp
+    )
+
+    OutlinedTextField(
+
+        value = username.value,
+        onValueChange = { username.value = it },
+        modifier = Modifier
+            .fillMaxWidth()
+            .autofill(listOf(AutofillType.Username),
+                onFill = { username.value = it }),
+        placeholder = { Text("Enter username") },
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor = Color.Gray,
+            unfocusedBorderColor = Color.Gray,
+            cursorColor = Color.Black,
+            backgroundColor = Color.White
+        )
+    )
+}
+
+@Composable
+private fun SignUpIntro() {
+    Text(
+        text = "Register",
+        style = MaterialTheme.typography.h5,
+        color = Color.Black,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(bottom = 15.dp, top = 59.dp)
+    )
+    Divider()
+    Text(
+        text = "Register below and start taking notes in seconds.",
+        modifier = Modifier.padding(bottom = 5.dp, top = Dimension.height(value = 0.8f).dp),
+        fontSize = 16.sp,
+    )
 }
 
 @Composable

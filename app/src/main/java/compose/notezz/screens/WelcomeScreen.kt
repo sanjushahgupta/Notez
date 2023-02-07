@@ -29,10 +29,10 @@ import androidx.navigation.NavController
 import compose.notezz.R
 import compose.notezz.model.ConnectionState
 import compose.notezz.model.UserPreference
-import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.launch
+
+@OptIn(DelicateCoroutinesApi::class)
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun WelcomeScreen(navController: NavController) {
@@ -54,20 +54,7 @@ fun WelcomeScreen(navController: NavController) {
         val scope = rememberCoroutineScope()
         val dataStore = UserPreference(context)
 
-
-        if (!isInternetAvailable(context)) {
-            if (!isInternetAvailable(context)) {
-               Text("OOPS! NO INTERNET CONNECTION.",color = Color.Gray)
-
-                Button(onClick = { navController.navigate("welcome") },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)
-                ) {
-                    Text(text = "TRY AGAIN")
-                }
-
-            }
-        } else {
-            scope.launch {
+        scope.launch {
                 dataStore.loginStatus.collect {
                     val token = it.toString()
                     async {
@@ -75,49 +62,43 @@ fun WelcomeScreen(navController: NavController) {
                         if (token == "loggedOut") {
                             navController.navigate("logIn")
                         } else {
-
                             (navController.navigate("listofNotes/$token"))
-
                         }
                     }.await()
-
                 }
             }
         }
-
     }
-}
-
-
-
-
 
 fun isInternetAvailable(context: Context): Boolean {
-    var result = false
-    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        val networkCapabilities = connectivityManager.activeNetwork ?: return false
-        val actNw = connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
-        result = when {
-            actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-            actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-            actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-            else -> false
-        }
-    } else {
-        connectivityManager.run {
-            connectivityManager.activeNetworkInfo?.run {
-                result = when (type) {
-                    ConnectivityManager.TYPE_WIFI -> true
-                    ConnectivityManager.TYPE_MOBILE -> true
-                    ConnectivityManager.TYPE_ETHERNET -> true
+            var result = false
+            val connectivityManager =
+                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val networkCapabilities = connectivityManager.activeNetwork ?: return false
+                val actNw =
+                    connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
+                result = when {
+                    actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+                    actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+                    actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
                     else -> false
                 }
+            } else {
+                connectivityManager.run {
+                    connectivityManager.activeNetworkInfo?.run {
+                        result = when (type) {
+                            ConnectivityManager.TYPE_WIFI -> true
+                            ConnectivityManager.TYPE_MOBILE -> true
+                            ConnectivityManager.TYPE_ETHERNET -> true
+                            else -> false
+                        }
+                    }
+                }
             }
+            return result
         }
-    }
-    return result
-}
+
 
 
 

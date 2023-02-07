@@ -1,6 +1,5 @@
 package compose.notezz.navigation
 
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
@@ -11,8 +10,7 @@ import compose.notezz.screens.*
 import kotlin.system.exitProcess
 
 @Composable
-
-fun navigationNavController() {
+fun NavigationNavController() {
     val navController = rememberNavController()
     val context = LocalContext.current
     NavHost(navController = navController, startDestination = "welcome") {
@@ -34,7 +32,7 @@ fun navigationNavController() {
             }
         }
 
-        composable("listofNotes/{token}") {
+        composable("listOfNotes/{token}") {
             HomeScreenListOfNotes(
                 it.arguments?.getString("token").toString(),
                 navController = navController
@@ -45,7 +43,7 @@ fun navigationNavController() {
         }
 
         composable("addNotes/{token}/{title}/{body}/{id}/{status}/{created}/{updated}/{userId}") {
-            AddandEditScreen(
+            AddEditScreen(
                 it.arguments?.getString("token").toString(),
                 it.arguments?.getString("title").toString(),
                 it.arguments?.getString("body").toString(),
@@ -59,7 +57,7 @@ fun navigationNavController() {
 
         }
 
-        composable("forgotpassword/{email}") {
+        composable("forgotPassword/{email}") {
             ForgotPassword(navController = navController)
         }
 

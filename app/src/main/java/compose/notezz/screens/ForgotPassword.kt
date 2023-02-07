@@ -1,18 +1,15 @@
 package compose.notezz.screens
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -24,15 +21,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import compose.notezz.R
-import compose.notezz.dataorexception.DataOrException
 import compose.notezz.model.UserEmail
-import compose.notezz.model.UsernameandPassword
 import compose.notezz.util.Dimension
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import retrofit2.Response
 
 @SuppressLint(
     "SuspiciousIndentation",
@@ -49,6 +43,7 @@ fun ForgotPassword(navController: NavController) {
     val emailID = remember { mutableStateOf("") }
     val focus = LocalFocusManager.current
     val context = LocalContext.current
+
     Scaffold(topBar = {
         TopAppBar(
             modifier = Modifier.fillMaxWidth(), backgroundColor = Color.DarkGray
@@ -62,6 +57,7 @@ fun ForgotPassword(navController: NavController) {
             // Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
         }
     }) {}
+
     Column(
         modifier = Modifier
             .clickable(MutableInteractionSource(),
@@ -74,133 +70,150 @@ fun ForgotPassword(navController: NavController) {
             .padding(start = 10.dp, end = 5.dp), verticalArrangement = Arrangement.Center
     ) {
 
-        Text(
-            stringResource(R.string.RequestLoginLink),
-            style = MaterialTheme.typography.h5,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 14.dp, top = 59.dp)
-
-        )
-        Divider()
-        Text(
-            text = stringResource(R.string.ForgotPasswordDescription),
-            //style = MaterialTheme.typography.h6,
-            modifier = Modifier.padding(8.dp)
-        )
-        Text(
-            "Email",
-            // color = Color.Black,
-            fontWeight = FontWeight.Bold, modifier = Modifier.padding(8.dp)
-        )
-        OutlinedTextField(
-            value = emailID.value,
-            onValueChange = { emailID.value = it },
-            placeholder = {
-                Text(
-                    text = "Enter email"
-
-                )
-            },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = Color.Gray,
-                unfocusedBorderColor = Color.Gray,
-                cursorColor = Color.Black,
-                backgroundColor = Color.White
-            )
-        )
+        RequestLoginLinkIntro()
+        EmailTextField(emailID)
         Row(modifier = Modifier.padding(8.dp)) {
-            Button(colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray)),
-                onClick = {
-                    forgotButton.value = true
-                    focus.clearFocus()
-                }) {
-
-                Icon(
-                    painter = painterResource(id = R.drawable.link),
-                    contentDescription = "link",
-                    tint = Color.White
-                )
-                Text("Send login link", color = Color.White)
-            }
-            Text("Back to login",
-                fontWeight = FontWeight.Bold,
-                color = colorResource(id = R.color.blueish),
-
-                modifier = Modifier
-                    .padding(10.dp)
-                    .clickable { navController.navigate("logIn") })
+            SendLoginLinkBtn(forgotButton, focus)
+            NavigateToLoginScreenTxt(navController)
         }
-        Column(
-            verticalArrangement = Arrangement.Bottom,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.requestloginlink),
-                contentDescription = "requestlinkimage",
-                modifier = Modifier.padding(top = 20.dp, start = Dimension.height(value = 8f).dp)
-            )
-        }
+        RequestLinkImage()
+
     }
 
     when {
         forgotButton.value -> {
 
             if (emailID.value.isEmpty()) {
-                val toast = Toast.makeText(
-                    context, "Please check your input.", Toast.LENGTH_SHORT
-                )
-                toast.duration = 100
-                toast.show()
-
+                ComposableToastMessage("Please check your input.", forgotButton)
             } else {
                 val emailId = emailID.value
                 GlobalScope.launch(Dispatchers.Main) {
                     try {
                         val response = authViewModel.forgotPassword(UserEmail(emailId))
-                        val responseCode = response.code()
-                        if (responseCode == 201) {
-                            val toast = Toast.makeText(
-                                context,
-                                "One time login link is sent to your registered email.",
-                                Toast.LENGTH_SHORT
-                            )
-                            toast.duration = 100
-                            toast.show()
-                            forgotButton.value = false
-
-                        } else if (responseCode == 400) {
-
-                            val toast = Toast.makeText(
-                               context, "Please check your input.", Toast.LENGTH_SHORT
-                            )
-                            toast.duration = 100
-                            toast.show()
-                            forgotButton.value = false
-                        } else {
-                            val toast = Toast.makeText(
-                               context, responseCode, Toast.LENGTH_SHORT
-                            )
-                            toast.duration = 100
-                            toast.show()
-                            forgotButton.value = false
+                        when (val responseCode = response.code()) {
+                            201 -> {
+                                toastMessage(
+                                    context,
+                                    "One time login link is sent to your registered email.",
+                                    forgotButton
+                                )
+                            }
+                            400 -> {
+                                toastMessage(context, "Please check your input.", forgotButton)
+                            }
+                            else -> {
+                                toastMessage(context, responseCode.toString(), forgotButton)
+                            }
                         }
                     } catch (e: java.net.UnknownHostException) {
-                        Toast.makeText(
+                        toastMessage(
                             context,
                             "Please check your internet connection.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        forgotButton.value = false
+                            forgotButton
+                        )
                     } catch (e: Exception) {
-                        val exceptionMsg = e!!.message.toString()
-                        val toast = Toast.makeText(context, "Something went wrong.", Toast.LENGTH_SHORT)
-                        toast.duration = 100
-                        toast.show()
-                        forgotButton.value = false
+                        toastMessage(context, "Something went wrong.", forgotButton)
                     }
                 }
             }
         }
     }
+}
+
+
+
+
+
+
+
+
+
+
+
+@Composable
+private fun NavigateToLoginScreenTxt(navController: NavController) {
+    Text("Back to login",
+        fontWeight = FontWeight.Bold,
+        color = colorResource(id = R.color.blueish),
+
+        modifier = Modifier
+            .padding(10.dp)
+            .clickable { navController.navigate("logIn") })
+}
+
+@Composable
+private fun SendLoginLinkBtn(
+    forgotButton: MutableState<Boolean>,
+    focus: FocusManager
+) {
+    Button(colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.gray)),
+        onClick = {
+            forgotButton.value = true
+            focus.clearFocus()
+        }) {
+
+        Icon(
+            painter = painterResource(id = R.drawable.link),
+            contentDescription = "link",
+            tint = Color.White
+        )
+        Text("Send login link", color = Color.White)
+    }
+}
+
+@Composable
+private fun RequestLinkImage() {
+    Column(
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.requestloginlink),
+            contentDescription = "requestlinkimage",
+            modifier = Modifier.padding(top = 20.dp, start = Dimension.height(value = 8f).dp)
+        )
+    }
+}
+
+@Composable
+private fun RequestLoginLinkIntro() {
+    Text(
+        stringResource(R.string.RequestLoginLink),
+        style = MaterialTheme.typography.h5,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(bottom = 14.dp, top = 59.dp)
+
+    )
+    Divider()
+    Text(
+        text = stringResource(R.string.ForgotPasswordDescription),
+        //style = MaterialTheme.typography.h6,
+        modifier = Modifier.padding(8.dp)
+    )
+}
+
+@Composable
+private fun EmailTextField(emailID: MutableState<String>) {
+    Text(
+        "Email",
+        // color = Color.Black,
+        fontWeight = FontWeight.Bold, modifier = Modifier.padding(8.dp)
+    )
+    OutlinedTextField(
+        value = emailID.value,
+        onValueChange = { emailID.value = it },
+        placeholder = {
+            Text(
+                text = "Enter email"
+
+            )
+        },
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            focusedBorderColor = Color.Gray,
+            unfocusedBorderColor = Color.Gray,
+            cursorColor = Color.Black,
+            backgroundColor = Color.White
+        )
+    )
 }
 
