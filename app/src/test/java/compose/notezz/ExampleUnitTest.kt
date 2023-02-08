@@ -1,5 +1,6 @@
 package compose.notezz
 
+import compose.notezz.model.UsernameandPassword
 import org.junit.Test
 
 import org.junit.Assert.*

@@ -65,14 +65,14 @@ fun ForgotPassword(navController: NavController) {
                 onClick = { focus.clearFocus() })
             .fillMaxWidth()
             .padding(
-                top = Dimension.height(value = 1f).dp, start = Dimension.height(value = 0.5f).dp
+                top = Dimension.height(value = 1f).dp
             )
             .padding(start = 10.dp, end = 5.dp), verticalArrangement = Arrangement.Center
     ) {
 
         RequestLoginLinkIntro()
         EmailTextField(emailID)
-        Row(modifier = Modifier.padding(8.dp)) {
+        Row() {
             SendLoginLinkBtn(forgotButton, focus)
             NavigateToLoginScreenTxt(navController)
         }
@@ -121,15 +121,6 @@ fun ForgotPassword(navController: NavController) {
 }
 
 
-
-
-
-
-
-
-
-
-
 @Composable
 private fun NavigateToLoginScreenTxt(navController: NavController) {
     Text("Back to login",
@@ -137,7 +128,7 @@ private fun NavigateToLoginScreenTxt(navController: NavController) {
         color = colorResource(id = R.color.blueish),
 
         modifier = Modifier
-            .padding(10.dp)
+            .padding(top = 17.dp, start = 15.dp)
             .clickable { navController.navigate("logIn") })
 }
 
@@ -187,9 +178,9 @@ private fun RequestLoginLinkIntro() {
     Divider()
     Text(
         text = stringResource(R.string.ForgotPasswordDescription),
-        //style = MaterialTheme.typography.h6,
-        modifier = Modifier.padding(8.dp)
-    )
+        modifier = Modifier.padding(bottom = 8.dp, top = 8.dp),
+
+        )
 }
 
 @Composable
@@ -197,7 +188,8 @@ private fun EmailTextField(emailID: MutableState<String>) {
     Text(
         "Email",
         // color = Color.Black,
-        fontWeight = FontWeight.Bold, modifier = Modifier.padding(8.dp)
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(bottom = 8.dp)
     )
     OutlinedTextField(
         value = emailID.value,
@@ -215,5 +207,7 @@ private fun EmailTextField(emailID: MutableState<String>) {
             backgroundColor = Color.White
         )
     )
+    Spacer(modifier = Modifier.padding(bottom = 10.dp))
+
 }
 

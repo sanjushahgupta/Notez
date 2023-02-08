@@ -119,7 +119,7 @@ fun Account(token: String, navController: NavController) {
 
         )
         Text(
-            text = stringResource(R.string.Updateacount), modifier = Modifier.padding(bottom = 5.dp)
+            text = stringResource(R.string.Updateacount), modifier = Modifier.padding(bottom = 5.dp, top = 5.dp)
 
         )
         Spacer(modifier = Modifier.padding(bottom = 15.dp))
@@ -316,7 +316,7 @@ fun Account(token: String, navController: NavController) {
             ) {
             Icon(
                 tint = Color.White,
-                painter = painterResource(id = R.drawable.ic_baseline_login_24),
+                painter = painterResource(id = R.drawable.baseline_delete_24),
                 contentDescription = "",
 
                 )
