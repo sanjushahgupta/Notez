@@ -17,7 +17,8 @@
 - add/update/list/delete notes
 
 ### Screenshot
-![notes](https://github.com/sanjushahgupta/notes/assets/71315276/bfc0626a-15f1-4b04-bf3d-5382b99d2a8a)
+<img width="283" alt="Screenshot 2023-06-24 at 17 43 17" src="https://github.com/sanjushahgupta/notes/assets/71315276/2a1e2fd9-ff8e-40a1-99d9-25c148ba95aa">
+
 
 ### Link
 - Live App: [notezz](https://play.google.com/store/apps/details?id=compose.notezz)
